@@ -1,0 +1,15 @@
+if TARGET_MX6QUANTA
+
+config SYS_BOARD
+	default "mx6quanta"
+
+config SYS_SOC
+	default "mx6"
+
+config SYS_VENDOR
+	default "quanta"
+
+config SYS_CONFIG_NAME
+	default "mx6quanta"
+
+endif
