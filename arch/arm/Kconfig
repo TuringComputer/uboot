@@ -470,6 +470,10 @@ config TARGET_MX53SMD
 	bool "Support mx53smd"
 	select CPU_V7
 
+config TARGET_MX53QUANTA
+	bool "Support mx53quanta"
+	select CPU_V7
+
 config TARGET_MX51_EFIKAMX
 	bool "Support mx51_efikamx"
 	select CPU_V7
@@ -839,6 +843,7 @@ source "board/freescale/mx53ard/Kconfig"
 source "board/freescale/mx53evk/Kconfig"
 source "board/freescale/mx53loco/Kconfig"
 source "board/freescale/mx53smd/Kconfig"
+source "board/quanta/mx53quanta/Kconfig"
 source "board/freescale/mx6qarm2/Kconfig"
 source "board/freescale/mx6qsabreauto/Kconfig"
 source "board/freescale/mx6sabresd/Kconfig"

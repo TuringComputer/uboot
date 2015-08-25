@@ -1,0 +1,3 @@
+CONFIG_SYS_EXTRA_OPTIONS="IMX_CONFIG=board/quanta/mx53quanta/imximage.cfg"
+CONFIG_ARM=y
+CONFIG_TARGET_MX53QUANTA=y

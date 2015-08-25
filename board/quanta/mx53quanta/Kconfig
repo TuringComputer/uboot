@@ -1,0 +1,15 @@
+if TARGET_MX53QUANTA
+
+config SYS_BOARD
+	default "mx53quanta"
+
+config SYS_VENDOR
+	default "quanta"
+
+config SYS_SOC
+	default "mx5"
+
+config SYS_CONFIG_NAME
+	default "mx53quanta"
+
+endif
