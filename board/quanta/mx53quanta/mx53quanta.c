@@ -67,17 +67,12 @@ void dram_init_banksize(void)
 
 u32 get_board_rev(void)
 {
-	struct iim_regs *iim = (struct iim_regs *)IMX_IIM_BASE;
-	struct fuse_bank *bank = &iim->bank[0];
-	struct fuse_bank0_regs *fuse =
-		(struct fuse_bank0_regs *)bank->fuse_regs;
+	// CPU Rev.D
+	if (i2c_probe(CONFIG_SYS_DIALOG_PMIC_I2C_ADDR))
+		return 0;
 
-	int rev = readl(&fuse->gp[6]);
-
-	if (!i2c_probe(CONFIG_SYS_DIALOG_PMIC_I2C_ADDR))
-		rev = 0;
-
-	return (get_cpu_rev() & ~(0xF << 8)) | (rev & 0xF) << 8;
+	// CPU Rev.B
+	return 1;
 }
 
 #define UART_PAD_CTRL	(PAD_CTL_HYS | PAD_CTL_DSE_HIGH | PAD_CTL_PUS_100K_UP | PAD_CTL_ODE)
@@ -189,6 +184,7 @@ static int power_init(void)
 {
 	unsigned int val;
 	int ret;
+	int retries = 10;
 	struct pmic *p;
 
 	if (!i2c_probe(CONFIG_SYS_DIALOG_PMIC_I2C_ADDR)) {
@@ -202,13 +198,16 @@ static int power_init(void)
 
 		setenv("fdt_file", "imx53-quanta-da9053.dtb");
 
-		/* Set VDDA to 1.25V */
+		/* Increase VDDGP as 1.25V for 1GHZ */
 		val = DA9052_BUCKCORE_BCOREEN | DA_BUCKCORE_VBCORE_1_250V;
-		ret = pmic_reg_write(p, DA9053_BUCKCORE_REG, val);
-		if (ret) {
-			printf("Writing to BUCKCORE_REG failed: %d\n", ret);
-			return ret;
-		}
+		do {
+			if (pmic_reg_write(p, DA9053_BUCKCORE_REG, val)) {
+				printf("da9052_i2c_is_connected - i2c write failed.....\n");
+			} else {
+				printf("da9052_i2c_is_connected - i2c write success....\n");
+				ret = 0;
+			}
+		} while (ret != 0 && retries--);
 
 		pmic_reg_read(p, DA9053_SUPPLY_REG, &val);
 		val |= DA9052_SUPPLY_VBCOREGO;
@@ -218,18 +217,16 @@ static int power_init(void)
 			return ret;
 		}
 
-		/* Set Vcc peripheral to 1.30V */
-		ret = pmic_reg_write(p, DA9053_BUCKPRO_REG, 0x62);
+		/* restore VUSB_2V5 when reset from suspend state */
+		val = 0x55;
+		ret = pmic_reg_write(p, DA9053_ID1213_REG, val);
 		if (ret) {
-			printf("Writing to BUCKPRO_REG failed: %d\n", ret);
+			printf("Writing to ID1213_REG failed: %d\n", ret);
 			return ret;
 		}
-
-		ret = pmic_reg_write(p, DA9053_SUPPLY_REG, 0x62);
-		if (ret) {
-			printf("Writing to SUPPLY_REG failed: %d\n", ret);
-			return ret;
-		}
+		pmic_reg_read(p, DA9053_SUPPLY_REG, &val);
+		val |= 0x20;
+		ret = pmic_reg_write(p, DA9053_SUPPLY_REG, val);
 
 		return ret;
 	}
@@ -269,23 +266,6 @@ static int power_init(void)
 		ret = pmic_reg_write(p, REG_POWER_CTL2, val);
 		if (ret) {
 			printf("Writing to REG_POWER_CTL2 failed: %d\n", ret);
-			return ret;
-		}
-
-		/* Set VUSBSEL and VUSBEN for USB PHY supply*/
-		pmic_reg_read(p, REG_MODE_0, &val);
-		val |= (VUSBSEL_MC34708 | VUSBEN_MC34708);
-		ret = pmic_reg_write(p, REG_MODE_0, val);
-		if (ret) {
-			printf("Writing to REG_MODE_0 failed: %d\n", ret);
-			return ret;
-		}
-
-		/* Set SWBST to 5V in auto mode */
-		val = SWBST_AUTO;
-		ret = pmic_reg_write(p, SWBST_CTRL, val);
-		if (ret) {
-			printf("Writing to SWBST_CTRL failed: %d\n", ret);
 			return ret;
 		}
 
@@ -340,8 +320,13 @@ int board_init(void)
 
 int board_late_init(void)
 {
-	if (!power_init())
-		clock_1GHz();
+	int ret = -1;
+	ret = power_init();
+
+	if (ret)
+		return ret;
+
+	clock_1GHz();
 
 	return 0;
 }

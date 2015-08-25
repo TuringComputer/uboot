@@ -114,7 +114,7 @@
 	"mmcdev=0\0" \
 	"mmcpart=1\0" \
 	"mmcroot=/dev/mmcblk0p2 rw rootwait\0" \
-	"mmcargs=setenv bootargs console=ttymxc2,${baudrate} root=${mmcroot}\0" \
+	"mmcargs=setenv bootargs console=ttymxc4,${baudrate} root=${mmcroot}\0" \
 	"loadbootscript=" \
 		"fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0" \
 	"bootscript=echo Running bootscript from mmc ...; " \
@@ -136,7 +136,7 @@
 		"else " \
 			"bootz; " \
 		"fi;\0" \
-	"netargs=setenv bootargs console=ttymxc2,${baudrate} " \
+	"netargs=setenv bootargs console=ttymxc4,${baudrate} " \
 		"root=/dev/nfs " \
 		"ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp\0" \
 	"netboot=echo Booting from net ...; " \
