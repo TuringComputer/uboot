@@ -6,4 +6,4 @@
 # SPDX-License-Identifier:	GPL-2.0+
 #
 
-obj-y  := mx6quanta.o
+obj-y  := mx6turing.o

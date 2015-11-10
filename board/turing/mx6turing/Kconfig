@@ -1,15 +1,15 @@
-if TARGET_MX6QUANTA
+if TARGET_MX6TURING
 
 config SYS_BOARD
-	default "mx6quanta"
+	default "mx6turing"
 
 config SYS_SOC
 	default "mx6"
 
 config SYS_VENDOR
-	default "quanta"
+	default "turing"
 
 config SYS_CONFIG_NAME
-	default "mx6quanta"
+	default "mx6turing"
 
 endif

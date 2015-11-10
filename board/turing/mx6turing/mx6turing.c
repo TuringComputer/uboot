@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2015 Quanta Tecnologia Eletronica, Ltda.
+ * Copyright (C) 2015 Turing Computer, Ltda.
  *
- * Author: Mauricio Cirelli <mauricio.cirelli@quantatec.com.br>
+ * Author: Mauricio Cirelli <mauricio@turingcomputer.com.br>
  *
  * Copyright (C) 2013 Jon Nettleton <jon.nettleton@gmail.com>
  *
@@ -529,7 +529,7 @@ static void gpr_init(void)
 }
 
 /*
- * FIXME: This section requires the differentiation between Quanta's i.MX6 boards.
+ * FIXME: This section requires the differentiation between Turing's i.MX6 boards.
  */
 static void spl_dram_init(int width)
 {

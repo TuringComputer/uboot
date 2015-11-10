@@ -196,7 +196,7 @@ static int power_init(void)
 		if (!p)
 			return -ENODEV;
 
-		setenv("fdt_file", "imx53-quanta-da9053.dtb");
+		setenv("fdt_file", "imx53-turing-da9053.dtb");
 
 		/* Increase VDDGP as 1.25V for 1GHZ */
 		val = DA9052_BUCKCORE_BCOREEN | DA_BUCKCORE_VBCORE_1_250V;
@@ -240,7 +240,7 @@ static int power_init(void)
 		if (!p)
 			return -ENODEV;
 
-		setenv("fdt_file", "imx53-quanta-mc34708.dtb");
+		setenv("fdt_file", "imx53-turing-mc34708.dtb");
 
 		/* Set VDDGP to 1.25V for 1GHz on SW1 */
 		pmic_reg_read(p, REG_SW_0, &val);
@@ -333,7 +333,7 @@ int board_late_init(void)
 
 int checkboard(void)
 {
-	puts("Board: MX53 QUANTA\n");
+	puts("Board: MX53 TURING\n");
 
 	return 0;
 }

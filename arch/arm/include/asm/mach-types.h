@@ -891,7 +891,7 @@ extern unsigned int __machine_arch_type;
 #define MACH_TYPE_LQ2                  3271
 #define MACH_TYPE_SWEDA_TMS2           3272
 #define MACH_TYPE_MX53_LOCO            3273
-#define MACH_TYPE_MX53_QUANTA          3274
+#define MACH_TYPE_MX53_TURING          3274
 #define MACH_TYPE_ACER_A8              3275
 #define MACH_TYPE_ACER_GAUGUIN         3276
 #define MACH_TYPE_GUPPY                3277
@@ -11658,16 +11658,16 @@ extern unsigned int __machine_arch_type;
 # define machine_is_mx53_loco()	(0)
 #endif
 
-#ifdef CONFIG_MACH_MX53_QUANTA
+#ifdef CONFIG_MACH_MX53_TURING
 # ifdef machine_arch_type
 #  undef machine_arch_type
 #  define machine_arch_type	__machine_arch_type
 # else
-#  define machine_arch_type	MACH_TYPE_MX53_QUANTA
+#  define machine_arch_type	MACH_TYPE_MX53_TURING
 # endif
-# define machine_is_mx53_quanta()	(machine_arch_type == MACH_TYPE_MX53_QUANTA)
+# define machine_is_mx53_turing()	(machine_arch_type == MACH_TYPE_MX53_QUANTA)
 #else
-# define machine_is_mx53_quanta()	(0)
+# define machine_is_mx53_turing()	(0)
 #endif
 
 #ifdef CONFIG_MACH_ACER_A8

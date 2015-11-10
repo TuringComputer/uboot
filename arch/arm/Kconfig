@@ -470,8 +470,8 @@ config TARGET_MX53SMD
 	bool "Support mx53smd"
 	select CPU_V7
 
-config TARGET_MX53QUANTA
-	bool "Support mx53quanta"
+config TARGET_MX53TURING
+	bool "Support mx53turing"
 	select CPU_V7
 
 config TARGET_MX51_EFIKAMX
@@ -536,8 +536,8 @@ config TARGET_MX6CUBOXI
 	select CPU_V7
 	select SUPPORT_SPL
 
-config TARGET_MX6QUANTA
-	bool "Support Quanta's i.MX6x boards"
+config TARGET_MX6TURING
+	bool "Support Turing's i.MX6x boards"
 	select CPU_V7
 	select SUPPORT_SPL
 
@@ -843,7 +843,7 @@ source "board/freescale/mx53ard/Kconfig"
 source "board/freescale/mx53evk/Kconfig"
 source "board/freescale/mx53loco/Kconfig"
 source "board/freescale/mx53smd/Kconfig"
-source "board/quanta/mx53quanta/Kconfig"
+source "board/turing/mx53turing/Kconfig"
 source "board/freescale/mx6qarm2/Kconfig"
 source "board/freescale/mx6qsabreauto/Kconfig"
 source "board/freescale/mx6sabresd/Kconfig"
@@ -872,7 +872,7 @@ source "board/palmtreo680/Kconfig"
 source "board/phytec/pcm051/Kconfig"
 source "board/ppcag/bg0900/Kconfig"
 source "board/pxa255_idp/Kconfig"
-source "board/quanta/mx6quanta/Kconfig"
+source "board/turing/mx6turing/Kconfig"
 source "board/samsung/smdk2410/Kconfig"
 source "board/sandisk/sansa_fuze_plus/Kconfig"
 source "board/scb9328/Kconfig"

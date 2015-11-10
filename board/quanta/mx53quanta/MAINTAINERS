@@ -1,6 +1,0 @@
-MX53QUANTA BOARD
-M:	Mauricio Cirelli <mauricio@turingcomputer.com.br>
-S:	Maintained
-F:	board/quanta/mx53quanta/
-F:	include/configs/mx53quanta.h
-F:	configs/mx53quanta_defconfig

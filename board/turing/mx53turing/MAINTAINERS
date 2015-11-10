@@ -1,0 +1,6 @@
+MX53TURING BOARD
+M:	Mauricio Cirelli <mauricio.cirelli@quantatec.com.br>
+S:	Maintained
+F:	board/turing/mx53turing/
+F:	include/configs/mx53turing.h
+F:	configs/mx53turing_defconfig
