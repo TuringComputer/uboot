@@ -113,9 +113,9 @@
 	"fdt_addr=0x71000000\0" 																				\
 	"boot_fdt=try\0" 																						\
 	"ip_dyn=yes\0" 																							\
-	"display_lvds=video=mxcdi0fb:RGB565,CLAA-WVGA ldb di0_primary\0"										\
-	"display_hdmi=video=mxcdi1fb:RGB24,1024x768M-16@60 hdmi di1_primary\0"									\
-	"display=${display_hdmi}\0"																				\
+	"display_lvds=video=mxcdi0fb:RGB565,CLAA-WVGA ldb"														\
+	"display_hdmi=video=mxcdi1fb:RGB24,1024x768M@60 hdmi di1_primary"										\
+	"display=${display_hdmi} ${display_lvds}"																\
 	"mmcdev=0\0" 																							\
 	"mmcpart=1\0" 																							\
 	"mmcroot=/dev/mmcblk0p2 rw rootwait\0" 																	\
@@ -141,7 +141,7 @@
 		"else " 																							\
 			"bootz; " 																						\
 		"fi;\0" 																							\
-	"netargs=setenv bootargs console=ttymxc4,${baudrate} no_console_suspend " 	\
+	"netargs=setenv bootargs console=ttymxc4,${baudrate} no_console_suspend \${display}" 					\
 		"root=/dev/nfs " 														\
 		"ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp\0" 						\
 	"netboot=echo Booting from net ...; " 										\
