@@ -113,13 +113,16 @@
 	"fdt_addr=0x71000000\0" 																				\
 	"boot_fdt=try\0" 																						\
 	"ip_dyn=yes\0" 																							\
-	"display_lvds=video=mxcdi0fb:RGB565,CLAA-WVGA ldb"														\
-	"display_hdmi=video=mxcdi1fb:RGB24,1024x768M@60 hdmi di1_primary"										\
-	"display=${display_hdmi} ${display_lvds}"																\
+	"hdmi_XGA=setenv bootargs ${bootargs} di1_primary video=mxcdi1fb:RGB24,1024x768M@60 hdmi\0"				\
+	"hdmi_720p=setenv bootargs ${bootargs} di1_primary video=mxcdi1fb:RGB24,1280x720M@60 hdmi\0"			\
+	"hdmi_1080p=setenv bootargs ${bootargs} di1_primary video=mxcdi1fb:RGB24,1080P60 hdmi\0"				\
+	"lvds=setenv bootargs ${bootargs} di0_primary video=mxcdi0fb:RGB565,CLAA-WVGA ldb=di0 calibration\0" 	\
+	"dual_display=setenv bootargs ${bootargs} di0_primary video=mxcdi0fb:RGB565,CLAA-WVGA ldb=di0 calibration video=mxcdi1fb:RGB24,1024x768M@60 hdmi\0" \
+	"set_display=run hdmi_XGA\0"																			\
 	"mmcdev=0\0" 																							\
 	"mmcpart=1\0" 																							\
 	"mmcroot=/dev/mmcblk0p2 rw rootwait\0" 																	\
-	"mmcargs=setenv bootargs console=ttymxc4,${baudrate} root=${mmcroot} no_console_suspend \${display}\0" 	\
+	"mmcargs=setenv bootargs console=ttymxc4,${baudrate} root=${mmcroot} no_console_suspend\0" 				\
 	"loadbootscript=" 																						\
 		"fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0" 										\
 	"bootscript=echo Running bootscript from mmc ...; " 													\
@@ -128,6 +131,7 @@
 	"loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdt_file}\0" 									\
 	"mmcboot=echo Booting from mmc ...; " 																	\
 		"run mmcargs; " 																					\
+		"run set_display;"																					\
 		"if test ${boot_fdt} = yes || test ${boot_fdt} = try; then " 										\
 			"if run loadfdt; then " 																		\
 				"bootz ${loadaddr} - ${fdt_addr}; " 														\
@@ -141,11 +145,12 @@
 		"else " 																							\
 			"bootz; " 																						\
 		"fi;\0" 																							\
-	"netargs=setenv bootargs console=ttymxc4,${baudrate} no_console_suspend \${display}" 					\
+	"netargs=setenv bootargs console=ttymxc4,${baudrate} no_console_suspend\0" 								\
 		"root=/dev/nfs " 														\
 		"ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp\0" 						\
 	"netboot=echo Booting from net ...; " 										\
 		"run netargs; " 														\
+		"run set_display;"														\
 		"if test ${ip_dyn} = yes; then " 										\
 			"setenv get_cmd dhcp; " 											\
 		"else " 																\
