@@ -269,6 +269,11 @@ int checkboard(void)
 
 int board_late_init(void)
 {
+	if (is_cpu_type(MXC_CPU_MX6Q) || is_cpu_type(MXC_CPU_MX6D))
+		setenv("board_rev", "MX6Q");
+	else
+		setenv("board_rev", "MX6DL");
+
 	return 0;
 }
 
@@ -303,23 +308,6 @@ static const struct mx6dq_iomux_ddr_regs mx6q_ddr_ioregs = {
 	.dram_dqm7 =  0x00000030,			// OK
 };
 
-static const struct mx6dq_iomux_grp_regs mx6q_grp_ioregs = {
-	.grp_ddr_type =  0x000C0000,		// OK
-	.grp_ddrmode_ctl =  0x00020000,		// OK
-	.grp_ddrpke = 0x00000000,			// OK
-	.grp_addds =  0x00000030,			// OK
-	.grp_ctlds =  0x00000030,			// OK
-	.grp_ddrmode = 0x00020000,			// OK
-	.grp_b0ds =  0x00000030,			// OK
-	.grp_b1ds =  0x00000030,			// OK
-	.grp_b2ds =  0x00000030,			// OK
-	.grp_b3ds =  0x00000030,			// OK
-	.grp_b4ds =  0x00000030,			// OK	
-	.grp_b5ds =  0x00000030,			// OK
-	.grp_b6ds =  0x00000030,			// OK
-	.grp_b7ds =  0x00000030,			// OK
-};
-
 static const struct mx6sdl_iomux_ddr_regs mx6dl_ddr_ioregs = {
 	.dram_sdclk_0 = 0x00000028,			// FIXME
 	.dram_sdclk_1 = 0x00000028,			// FIXME
@@ -347,6 +335,23 @@ static const struct mx6sdl_iomux_ddr_regs mx6dl_ddr_ioregs = {
 	.dram_dqm5 =	0x00000028,			// FIXME
 	.dram_dqm6 =	0x00000028,			// FIXME
 	.dram_dqm7 =	0x00000028,			// FIXME
+};
+
+static const struct mx6dq_iomux_grp_regs mx6q_grp_ioregs = {
+	.grp_ddr_type =  0x000C0000,		// OK
+	.grp_ddrmode_ctl =  0x00020000,		// OK
+	.grp_ddrpke = 0x00000000,			// OK
+	.grp_addds =  0x00000030,			// OK
+	.grp_ctlds =  0x00000030,			// OK
+	.grp_ddrmode = 0x00020000,			// OK
+	.grp_b0ds =  0x00000030,			// OK
+	.grp_b1ds =  0x00000030,			// OK
+	.grp_b2ds =  0x00000030,			// OK
+	.grp_b3ds =  0x00000030,			// OK
+	.grp_b4ds =  0x00000030,			// OK
+	.grp_b5ds =  0x00000030,			// OK
+	.grp_b6ds =  0x00000030,			// OK
+	.grp_b7ds =  0x00000030,			// OK
 };
 
 static const struct mx6sdl_iomux_grp_regs mx6sdl_grp_ioregs = {
@@ -478,9 +483,6 @@ static void gpr_init(void)
 	writel(0x007F007F, &iomux->gpr[7]);
 }
 
-/*
- * FIXME: This section requires the differentiation between Turing's i.MX6 boards.
- */
 static void spl_dram_init(int width)
 {
 	struct mx6_ddr_sysinfo sysinfo = {

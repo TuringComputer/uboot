@@ -119,8 +119,8 @@
 #define CONFIG_LOADADDR			0x12000000
 #define CONFIG_SYS_TEXT_BASE		0x17800000
 
-#define CONFIG_MXC_UART_BASE	UART3_BASE
-#define CONFIG_CONSOLE_DEV	"ttymxc2"
+#define CONFIG_MXC_UART_BASE	UART5_BASE
+#define CONFIG_CONSOLE_DEV	"ttymxc4"
 #define CONFIG_MMCROOT		"/dev/mmcblk0p2"
 #define CONFIG_SYS_FSL_USDHC_NUM	1
 #define CONFIG_SYS_MMC_ENV_DEV		0	/* SDHC4 */
@@ -199,14 +199,10 @@
 			"bootz; " \
 		"fi;\0" \
 	"findfdt="\
-		"if test $board_name = HUMMINGBOARD && test $board_rev = MX6Q ; then " \
-			"setenv fdtfile imx6q-hummingboard.dtb; fi; " \
-		"if test $board_name = HUMMINGBOARD && test $board_rev = MX6DL ; then " \
-			"setenv fdtfile imx6dl-hummingboard.dtb; fi; " \
-		"if test $board_name = CUBOXI && test $board_rev = MX6Q ; then " \
-			"setenv fdtfile imx6q-cubox-i.dtb; fi; " \
-		"if test $board_name = CUBOXI && test $board_rev = MX6DL ; then " \
-			"setenv fdtfile imx6dl-cubox-i.dtb; fi; " \
+		"if test $board_rev = MX6Q ; then " \
+			"setenv fdtfile imx6q-turing-eval.dtb; fi; " \
+		"if test $board_rev = MX6DL ; then " \
+			"setenv fdtfile imx6dl-turing-eval.dtb; fi; " \
 		"if test $fdtfile = undefined; then " \
 			"echo WARNING: Could not determine dtb to use; fi; \0" \
 
