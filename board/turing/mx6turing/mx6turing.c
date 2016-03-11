@@ -56,8 +56,6 @@ DECLARE_GLOBAL_DATA_PTR;
 
 #define I2C_PMIC	1
 
-#define USDHC1_CD_GPIO				IMX_GPIO_NR(2, 0)
-
 int dram_init(void)
 {
 	gd->ram_size = imx_ddr_size();
@@ -118,10 +116,13 @@ static void setup_iomux_uart(void)
 	SETUP_IOMUX_PADS(uart3_pads);
 }
 
+#ifdef CONFIG_FSL_ESDHC
 static struct fsl_esdhc_cfg usdhc_cfg[2] = {
 	{USDHC1_BASE_ADDR},
 	{USDHC4_BASE_ADDR},
 };
+
+#define USDHC1_CD_GPIO		IMX_GPIO_NR(2, 0)
 
 int board_mmc_getcd(struct mmc *mmc)
 {
@@ -131,12 +132,9 @@ int board_mmc_getcd(struct mmc *mmc)
 	switch (cfg->esdhc_base) {
 	case USDHC1_BASE_ADDR:
 		ret = !gpio_get_value(USDHC1_CD_GPIO);
-		if (!ret) {
-			puts("USDHC1 Card not present!\n");
-		}
 		break;
 	case USDHC4_BASE_ADDR:
-		ret = 1; /* eMMC/uSDHC4 is always present */
+		ret = 1; /* eMMC/USDHC4 is always present */
 		break;
 	}
 
@@ -146,31 +144,39 @@ int board_mmc_getcd(struct mmc *mmc)
 int board_mmc_init(bd_t *bis)
 {
 #ifndef CONFIG_SPL_BUILD
-	int ret = 0;
-	int index = 0;
+	int ret;
+	int i;
 
-	for (index = 0; index < CONFIG_SYS_FSL_USDHC_NUM; index++) {
-		switch (index) {
+	/*
+	 * According to the board_mmc_init() the following map is done:
+	 * (U-boot device node)    (Physical Port)
+	 * mmc0                    uSD 	(USDHC1)
+	 * mmc1                    eMMC (USDHC4)
+	 */
+	for (i = 0; i < CONFIG_SYS_FSL_USDHC_NUM; i++) {
+		switch (i) {
 		case 0:
-			imx_iomux_v3_setup_multiple_pads(usdhc1_pads, ARRAY_SIZE(usdhc1_pads));
-			usdhc_cfg[index].sdhc_clk = mxc_get_clock(MXC_ESDHC_CLK);
-			usdhc_cfg[index].esdhc_base = USDHC1_BASE_ADDR;
+			SETUP_IOMUX_PADS(usdhc1_pads);
 			gpio_direction_input(USDHC1_CD_GPIO);
+			usdhc_cfg[i].sdhc_clk = mxc_get_clock(MXC_ESDHC_CLK);
+			usdhc_cfg[i].max_bus_width = 4;
 			break;
 		case 1:
-			imx_iomux_v3_setup_multiple_pads(usdhc4_pads, ARRAY_SIZE(usdhc4_pads));
-			usdhc_cfg[index].sdhc_clk = mxc_get_clock(MXC_ESDHC4_CLK);
-			usdhc_cfg[index].esdhc_base = USDHC4_BASE_ADDR;
+			SETUP_IOMUX_PADS(usdhc4_pads);
+			usdhc_cfg[i].sdhc_clk = mxc_get_clock(MXC_ESDHC4_CLK);
+			usdhc_cfg[i].max_bus_width = 8;
 			break;
 		default:
 			printf("Warning: you configured more USDHC controllers"
-						       "(%d) then supported by the board (%d)\n",
-						       index + 1, CONFIG_SYS_FSL_USDHC_NUM);
+				   "(%d) then supported by the board (%d)\n",
+				   i + 1, CONFIG_SYS_FSL_USDHC_NUM);
 			return -EINVAL;
 		}
-		ret = fsl_esdhc_initialize(bis, &usdhc_cfg[index]);
-		if (ret)
+
+		ret = fsl_esdhc_initialize(bis, &usdhc_cfg[i]);
+		if (ret) {
 			return ret;
+		}
 	}
 
 	return 0;
@@ -181,44 +187,37 @@ int board_mmc_init(bd_t *bis)
 	 * Upon reading BOOT_CFG register the following map is done:
 	 * Bit 11 and 12 of BOOT_CFG register can determine the current
 	 * mmc port
-	 * 0x1                  SD1
+	 * 0x0                  SD1
+	 * 0x1                  SD2
+	 * 0x2					SD3
 	 * 0x3                  SD4
 	 */
 
-	switch (reg & 0x3) {
-	case 0x1:
-		imx_iomux_v3_setup_multiple_pads(usdhc1_pads, ARRAY_SIZE(usdhc1_pads));
+	int port = reg & 0x3;
+	switch (port) {
+	case 0x0:
+		SETUP_IOMUX_PADS(usdhc1_pads);
 		usdhc_cfg[0].esdhc_base = USDHC1_BASE_ADDR;
-		usdhc_cfg[0].sdhc_clk = mxc_get_clock(MXC_ESDHC2_CLK);
+		usdhc_cfg[0].sdhc_clk = mxc_get_clock(MXC_ESDHC_CLK);
 		gd->arch.sdhc_clk = usdhc_cfg[0].sdhc_clk;
+		printf("Initializing USDHC1 as boot device\n");
 		break;
 	case 0x3:
-		imx_iomux_v3_setup_multiple_pads(usdhc4_pads, ARRAY_SIZE(usdhc4_pads));
+		SETUP_IOMUX_PADS(usdhc4_pads);
 		usdhc_cfg[0].esdhc_base = USDHC4_BASE_ADDR;
 		usdhc_cfg[0].sdhc_clk = mxc_get_clock(MXC_ESDHC4_CLK);
 		gd->arch.sdhc_clk = usdhc_cfg[0].sdhc_clk;
+		printf("Initializing USDHC4 as boot device\n");
+		break;
+	default:
+		printf("Unknown USDHC boot device: 0x%x\n", port);
 		break;
 	}
 
 	return fsl_esdhc_initialize(bis, &usdhc_cfg[0]);
 #endif
 }
-
-#ifdef CONFIG_VIDEO_IPUV3
-
-struct display_info_t const displays[] = {{
-
-}};
-
-size_t display_count = ARRAY_SIZE(displays);
-
-static int setup_display(void)
-{
-	// TODO
-
-	return 0;
-}
-#endif /* CONFIG_VIDEO_IPUV3 */
+#endif
 
 #ifdef CONFIG_USB_EHCI_MX6
 
@@ -233,10 +232,6 @@ int board_early_init_f(void)
 {
 	int ret = 0;
 	setup_iomux_uart();
-
-#if defined(CONFIG_VIDEO_IPUV3)
-	setup_display();
-#endif
 
 	return ret;
 }
@@ -297,6 +292,7 @@ int board_init(void)
 
 int checkboard(void)
 {
+	puts("Board: MX6-Turing\n");
 	return 0;
 }
 
