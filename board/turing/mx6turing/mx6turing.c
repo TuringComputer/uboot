@@ -159,7 +159,7 @@ int board_mmc_init(bd_t *bis)
 		puts("OK\n");
 	}
 
-#if defined(CONFIG_ENV_IS_IN_MMC)
+#if (CONFIG_ENABLE_USDHC4)
 	puts("\nInitializing MMC USDHC4: ");
 	imx_iomux_v3_setup_multiple_pads(usdhc4_pads, ARRAY_SIZE(usdhc4_pads));
 	usdhc_cfg[1].esdhc_base = USDHC4_BASE_ADDR;
