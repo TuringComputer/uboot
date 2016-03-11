@@ -131,6 +131,9 @@ int board_mmc_getcd(struct mmc *mmc)
 	switch (cfg->esdhc_base) {
 	case USDHC1_BASE_ADDR:
 		ret = !gpio_get_value(USDHC1_CD_GPIO);
+		if (!ret) {
+			puts("USDHC1 Card not present!\n");
+		}
 		break;
 	case USDHC4_BASE_ADDR:
 		ret = 1; /* eMMC/uSDHC4 is always present */
@@ -143,37 +146,29 @@ int board_mmc_getcd(struct mmc *mmc)
 int board_mmc_init(bd_t *bis)
 {
 	int ret = 0;
+	int index = 0;
 
-	puts("\nInitializing MMC USDHC1: ");
-	imx_iomux_v3_setup_multiple_pads(usdhc1_pads, ARRAY_SIZE(usdhc1_pads));
-	usdhc_cfg[0].esdhc_base = USDHC1_BASE_ADDR;
-	gpio_direction_input(USDHC1_CD_GPIO);
-	usdhc_cfg[0].sdhc_clk = mxc_get_clock(MXC_ESDHC_CLK);
-	gd->arch.sdhc_clk = usdhc_cfg[0].sdhc_clk;
-
-	ret = fsl_esdhc_initialize(bis, &usdhc_cfg[0]);
-	if (ret) {
-		puts("ERROR!\n");
+	for (index = 0; index < CONFIG_SYS_FSL_ESDHC_NUM; index++) {
+		switch (index) {
+		case 0:
+			imx_iomux_v3_setup_multiple_pads(usdhc1_pads, ARRAY_SIZE(usdhc1_pads));
+			usdhc_cfg[index].sdhc_clk = mxc_get_clock(MXC_ESDHC_CLK);
+			usdhc_cfg[index].esdhc_base = USDHC1_BASE_ADDR;
+			gpio_direction_input(USDHC1_CD_GPIO);
+			break;
+		case 1:
+			imx_iomux_v3_setup_multiple_pads(usdhc4_pads, ARRAY_SIZE(usdhc4_pads));
+			usdhc_cfg[index].sdhc_clk = mxc_get_clock(MXC_ESDHC4_CLK);
+			usdhc_cfg[index].esdhc_base = USDHC4_BASE_ADDR;
+			break;
+		default:
+			printf("Warning: you configured more USDHC controllers (%d) as supported by the board (2)\n", CONFIG_SYS_FSL_ESDHC_NUM);
+			return -EINVAL;
+		}
+		ret = fsl_esdhc_initialize(bis, &usdhc_cfg[index]);
+		if (ret)
+			return ret;
 	}
-	else {
-		puts("OK\n");
-	}
-
-#if (CONFIG_ENABLE_USDHC4)
-	puts("\nInitializing MMC USDHC4: ");
-	imx_iomux_v3_setup_multiple_pads(usdhc4_pads, ARRAY_SIZE(usdhc4_pads));
-	usdhc_cfg[1].esdhc_base = USDHC4_BASE_ADDR;
-	usdhc_cfg[1].sdhc_clk = mxc_get_clock(MXC_ESDHC4_CLK);
-	gd->arch.sdhc_clk = usdhc_cfg[1].sdhc_clk;
-
-	ret = fsl_esdhc_initialize(bis, &usdhc_cfg[1]);
-	if (ret) {
-		puts("ERROR!\n");
-	}
-	else {
-		puts("OK\n");
-	}
-#endif
 
 	return 0;
 }
