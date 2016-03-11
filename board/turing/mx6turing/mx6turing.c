@@ -145,10 +145,11 @@ int board_mmc_getcd(struct mmc *mmc)
 
 int board_mmc_init(bd_t *bis)
 {
+#ifndef CONFIG_SPL_BUILD
 	int ret = 0;
 	int index = 0;
 
-	for (index = 0; index < CONFIG_SYS_FSL_ESDHC_NUM; index++) {
+	for (index = 0; index < CONFIG_SYS_FSL_USDHC_NUM; index++) {
 		switch (index) {
 		case 0:
 			imx_iomux_v3_setup_multiple_pads(usdhc1_pads, ARRAY_SIZE(usdhc1_pads));
@@ -162,7 +163,9 @@ int board_mmc_init(bd_t *bis)
 			usdhc_cfg[index].esdhc_base = USDHC4_BASE_ADDR;
 			break;
 		default:
-			printf("Warning: you configured more USDHC controllers (%d) as supported by the board (2)\n", CONFIG_SYS_FSL_ESDHC_NUM);
+			printf("Warning: you configured more USDHC controllers"
+						       "(%d) then supported by the board (%d)\n",
+						       index + 1, CONFIG_SYS_FSL_USDHC_NUM);
 			return -EINVAL;
 		}
 		ret = fsl_esdhc_initialize(bis, &usdhc_cfg[index]);
@@ -171,6 +174,34 @@ int board_mmc_init(bd_t *bis)
 	}
 
 	return 0;
+#else
+	struct src *psrc = (struct src *)SRC_BASE_ADDR;
+	unsigned reg = readl(&psrc->sbmr1) >> 11;
+	/*
+	 * Upon reading BOOT_CFG register the following map is done:
+	 * Bit 11 and 12 of BOOT_CFG register can determine the current
+	 * mmc port
+	 * 0x1                  SD1
+	 * 0x3                  SD4
+	 */
+
+	switch (reg & 0x3) {
+	case 0x1:
+		imx_iomux_v3_setup_multiple_pads(usdhc1_pads, ARRAY_SIZE(usdhc1_pads));
+		usdhc_cfg[0].esdhc_base = USDHC1_BASE_ADDR;
+		usdhc_cfg[0].sdhc_clk = mxc_get_clock(MXC_ESDHC2_CLK);
+		gd->arch.sdhc_clk = usdhc_cfg[0].sdhc_clk;
+		break;
+	case 0x3:
+		imx_iomux_v3_setup_multiple_pads(usdhc4_pads, ARRAY_SIZE(usdhc4_pads));
+		usdhc_cfg[0].esdhc_base = USDHC4_BASE_ADDR;
+		usdhc_cfg[0].sdhc_clk = mxc_get_clock(MXC_ESDHC4_CLK);
+		gd->arch.sdhc_clk = usdhc_cfg[0].sdhc_clk;
+		break;
+	}
+
+	return fsl_esdhc_initialize(bis, &usdhc_cfg[0]);
+#endif
 }
 
 #ifdef CONFIG_VIDEO_IPUV3

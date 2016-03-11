@@ -51,7 +51,7 @@
 #define CONFIG_FSL_USDHC
 #define CONFIG_FSL_ESDHC
 #define CONFIG_SYS_FSL_ESDHC_ADDR		0
-#define CONFIG_SYS_FSL_ESDHC_NUM		1
+#define CONFIG_SYS_FSL_USDHC_NUM		1
 #define CONFIG_MMC
 #define CONFIG_CMD_MMC
 #define CONFIG_GENERIC_MMC
@@ -122,13 +122,13 @@
 
 #define CONFIG_MXC_UART_BASE		UART5_BASE
 #define CONFIG_CONSOLE_DEV			"ttymxc4"
-#define CONFIG_SYS_FSL_USDHC_NUM	1
+#define CONFIG_SYS_FSL_USDHC_NUM		1
 #if defined(CONFIG_ENV_IS_IN_MMC)
-#define CONFIG_SYS_MMC_ENV_DEV		1	/* SDHC4 */
-#define CONFIG_MMCROOT				"/dev/mmcblk2p2"
+	#define CONFIG_SYS_MMC_ENV_DEV		1	/* SDHC4 */
+	#define CONFIG_MMCROOT				"/dev/mmcblk2p2"
 #else
-#define CONFIG_SYS_MMC_ENV_DEV		0	/* SDHC1 */
-#define CONFIG_MMCROOT				"/dev/mmcblk0p2"
+	#define CONFIG_SYS_MMC_ENV_DEV		0	/* SDHC1 */
+	#define CONFIG_MMCROOT				"/dev/mmcblk0p2"
 #endif
 
 #define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG

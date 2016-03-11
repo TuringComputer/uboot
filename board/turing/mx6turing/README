@@ -1,10 +1,10 @@
-How to use U-boot on Quanta's i.MX6 Boards
+How to use U-boot on Turing's i.MX6 Boards
 -----------------------------------------------------------
 
-- Build U-boot for Quanta's i.MX6 Boards:
+- Build U-boot for Turing's i.MX6 Boards:
 
 $ make mrproper
-$ make mx6cuboxi_defconfig
+$ make mx6turing_defconfig
 $ make
 
 This will generate the SPL image called SPL and the u-boot.img.
@@ -17,5 +17,4 @@ sudo dd if=SPL of=/dev/mmcblk0 bs=1k seek=1; sync
 
 sudo dd if=u-boot.img of=/dev/mmcblk0 bs=1k seek=69; sync
 
-- Insert the SD card in the board, power it up and U-boot messages should
-come up.
+- Insert the SD card in the board, power it up and U-boot messages should come up.
