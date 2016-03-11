@@ -144,7 +144,7 @@ int board_mmc_init(bd_t *bis)
 {
 	int ret = 0;
 
-	puts("Initializing MMC USDHC1: ");
+	puts("\nInitializing MMC USDHC1: ");
 	imx_iomux_v3_setup_multiple_pads(usdhc1_pads, ARRAY_SIZE(usdhc1_pads));
 	usdhc_cfg[0].esdhc_base = USDHC1_BASE_ADDR;
 	gpio_direction_input(USDHC1_CD_GPIO);
@@ -154,12 +154,12 @@ int board_mmc_init(bd_t *bis)
 	ret = fsl_esdhc_initialize(bis, &usdhc_cfg[0]);
 	if (ret) {
 		puts("ERROR!\n");
-		return ret;
+	}
+	else {
+		puts("OK\n");
 	}
 
-	puts("OK\n");
-
-	puts("Initializing MMC USDHC1: ");
+	puts("\nInitializing MMC USDHC4: ");
 	imx_iomux_v3_setup_multiple_pads(usdhc4_pads, ARRAY_SIZE(usdhc4_pads));
 	usdhc_cfg[1].esdhc_base = USDHC4_BASE_ADDR;
 	usdhc_cfg[1].sdhc_clk = mxc_get_clock(MXC_ESDHC4_CLK);
@@ -168,10 +168,11 @@ int board_mmc_init(bd_t *bis)
 	ret = fsl_esdhc_initialize(bis, &usdhc_cfg[1]);
 	if (ret) {
 		puts("ERROR!\n");
-		return ret;
+	}
+	else {
+		puts("OK\n");
 	}
 
-	puts("OK\n");
 	return 0;
 }
 
