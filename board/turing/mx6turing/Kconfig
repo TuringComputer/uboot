@@ -12,4 +12,10 @@ config SYS_VENDOR
 config SYS_CONFIG_NAME
 	default "mx6turing"
 
+config TURING_SMART_VARIANT
+	bool
+	default n
+
 endif
+
+

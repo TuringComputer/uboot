@@ -56,6 +56,12 @@ DECLARE_GLOBAL_DATA_PTR;
 
 #define I2C_PMIC	1
 
+#define GPIO_LED1				IMX_GPIO_NR(2, 3)
+#define GPIO_LED2				IMX_GPIO_NR(2, 4)
+#define GPIO_LED3				IMX_GPIO_NR(2, 5)
+#define GPIO_LED4				IMX_GPIO_NR(6, 7)
+#define GPIO_LED5				IMX_GPIO_NR(2, 2)
+
 int dram_init(void)
 {
 	gd->ram_size = imx_ddr_size();
@@ -97,15 +103,33 @@ static iomux_v3_cfg_t const usdhc4_pads[] = {
 	IOMUX_PADS(PAD_SD4_DAT7__SD4_DATA7 | MUX_PAD_CTRL(USDHC_PAD_CTRL)),
 };
 
-static struct i2c_pads_info i2c_pad_info = {
+static iomux_v3_cfg_t const i2c2_pads[] = {
+	IOMUX_PADS(PAD_KEY_COL3__I2C2_SCL  | MUX_PAD_CTRL(I2C_PAD_CTRL)),
+	IOMUX_PADS(PAD_KEY_ROW3__I2C2_SDA  | MUX_PAD_CTRL(I2C_PAD_CTRL)),
+};
+
+static struct i2c_pads_info i2cq_pad_info = {
 	.scl = {
-		.i2c_mode = IOMUX_PADS(PAD_KEY_COL3__I2C2_SCL | MUX_PAD_CTRL(I2C_PAD_CTRL)),
-		.gpio_mode = IOMUX_PADS(PAD_KEY_COL3__GPIO4_IO12 | MUX_PAD_CTRL(I2C_PAD_CTRL)),
+		.i2c_mode = MX6Q_PAD_KEY_COL3__I2C2_SCL | MUX_PAD_CTRL(I2C_PAD_CTRL),
+		.gpio_mode = MX6Q_PAD_KEY_COL3__GPIO4_IO12 | MUX_PAD_CTRL(I2C_PAD_CTRL),
 		.gp = IMX_GPIO_NR(4, 12)
 	},
 	.sda = {
-		.i2c_mode = IOMUX_PADS(PAD_KEY_ROW3__I2C2_SDA | MUX_PAD_CTRL(I2C_PAD_CTRL)),
-		.gpio_mode = IOMUX_PADS(PAD_KEY_ROW3__GPIO4_IO13 | MUX_PAD_CTRL(I2C_PAD_CTRL)),
+		.i2c_mode = MX6Q_PAD_KEY_ROW3__I2C2_SDA | MUX_PAD_CTRL(I2C_PAD_CTRL),
+		.gpio_mode = MX6Q_PAD_KEY_ROW3__GPIO4_IO13 | MUX_PAD_CTRL(I2C_PAD_CTRL),
+		.gp = IMX_GPIO_NR(4, 13)
+	}
+};
+
+static struct i2c_pads_info i2cdl_pad_info = {
+	.scl = {
+		.i2c_mode = MX6DL_PAD_KEY_COL3__I2C2_SCL | MUX_PAD_CTRL(I2C_PAD_CTRL),
+		.gpio_mode = MX6DL_PAD_KEY_COL3__GPIO4_IO12 | MUX_PAD_CTRL(I2C_PAD_CTRL),
+		.gp = IMX_GPIO_NR(4, 12)
+	},
+	.sda = {
+		.i2c_mode = MX6DL_PAD_KEY_ROW3__I2C2_SDA | MUX_PAD_CTRL(I2C_PAD_CTRL),
+		.gpio_mode = MX6DL_PAD_KEY_ROW3__GPIO4_IO13 | MUX_PAD_CTRL(I2C_PAD_CTRL),
 		.gp = IMX_GPIO_NR(4, 13)
 	}
 };
@@ -285,7 +309,14 @@ int board_init(void)
 	/* address of boot parameters */
 	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
 
-	setup_i2c(1, CONFIG_SYS_I2C_SPEED, 0x7f, &i2c_pad_info);
+	if (is_cpu_type(MXC_CPU_MX6Q) || is_cpu_type(MXC_CPU_MX6D))
+	{
+		setup_i2c(1, CONFIG_SYS_I2C_SPEED, 0x7f, &i2cq_pad_info);
+	}
+	else
+	{
+		setup_i2c(1, CONFIG_SYS_I2C_SPEED, 0x7f, &i2cdl_pad_info);
+	}
 
 	return 0;
 }
@@ -311,181 +342,141 @@ int board_late_init(void)
 static const struct mx6dq_iomux_ddr_regs mx6q_ddr_ioregs = {
 	.dram_sdclk_0 =  0x00000030,		// OK
 	.dram_sdclk_1 =  0x00000030,		// OK
-	.dram_cas =  0x00000030,			// OK
-	.dram_ras =  0x00000030,			// OK
-	.dram_reset =  0x00000030,			// OK
-	.dram_sdcke0 =  0x00003000,			// N/A
-	.dram_sdcke1 =  0x00003000,			// N/A
-	.dram_sdba2 =  0x00000000,			// OK
-	.dram_sdodt0 =  0x00000030,			// OK	
-	.dram_sdodt1 =  0x00000030,			// OK
-	.dram_sdqs0 =  0x00000030,			// OK
-	.dram_sdqs1 =  0x00000030,			// OK
-	.dram_sdqs2 =  0x00000030,			// OK
-	.dram_sdqs3 =  0x00000030,			// OK
-	.dram_sdqs4 =  0x00000030,			// OK
-	.dram_sdqs5 =  0x00000030,			// OK
-	.dram_sdqs6 =  0x00000030,			// OK
-	.dram_sdqs7 =  0x00000030,			// OK
-	.dram_dqm0 =  0x00000030,			// OK
-	.dram_dqm1 =  0x00000030,			// OK
-	.dram_dqm2 =  0x00000030,			// OK
-	.dram_dqm3 =  0x00000030,			// OK
-	.dram_dqm4 =  0x00000030,			// OK	
-	.dram_dqm5 =  0x00000030,			// OK
-	.dram_dqm6 =  0x00000030,			// OK
-	.dram_dqm7 =  0x00000030,			// OK
-};
-
-static const struct mx6sdl_iomux_ddr_regs mx6dl_ddr_ioregs = {
-	.dram_sdclk_0 = 0x00000028,			// FIXME
-	.dram_sdclk_1 = 0x00000028,			// FIXME
-	.dram_cas =	0x00000028,				// FIXME
-	.dram_ras =	0x00000028,				// FIXME
-	.dram_reset =	0x000c0028,			// FIXME
-	.dram_sdcke0 =	0x00003000,			// FIXME
-	.dram_sdcke1 =	0x00003000,			// FIXME
-	.dram_sdba2 =	0x00000000,			// FIXME
-	.dram_sdodt0 =	0x00003030,			// FIXME
-	.dram_sdodt1 =	0x00003030,			// FIXME
-	.dram_sdqs0 =	0x00000028,			// FIXME
-	.dram_sdqs1 =	0x00000028,			// FIXME
-	.dram_sdqs2 =	0x00000028,			// FIXME
-	.dram_sdqs3 =	0x00000028,			// FIXME
-	.dram_sdqs4 =	0x00000028,			// FIXME
-	.dram_sdqs5 =	0x00000028,			// FIXME
-	.dram_sdqs6 =	0x00000028,			// FIXME
-	.dram_sdqs7 =	0x00000028,			// FIXME
-	.dram_dqm0 =	0x00000028,			// FIXME
-	.dram_dqm1 =	0x00000028,			// FIXME
-	.dram_dqm2 =	0x00000028,			// FIXME
-	.dram_dqm3 =	0x00000028,			// FIXME
-	.dram_dqm4 =	0x00000028,			// FIXME
-	.dram_dqm5 =	0x00000028,			// FIXME
-	.dram_dqm6 =	0x00000028,			// FIXME
-	.dram_dqm7 =	0x00000028,			// FIXME
+	.dram_cas     =  0x00000030,		// OK
+	.dram_ras     =  0x00000030,		// OK
+	.dram_reset   =  0x00000030,		// OK
+	.dram_sdcke0  =  0x00003000,		// N/A
+	.dram_sdcke1  =  0x00003000,		// N/A
+	.dram_sdba2   =  0x00000000,		// OK
+	.dram_sdodt0  =  0x00000030,		// OK
+	.dram_sdodt1  =  0x00000030,		// OK
+	.dram_sdqs0   =  0x00000030,		// OK
+	.dram_sdqs1   =  0x00000030,		// OK
+	.dram_sdqs2   =  0x00000030,		// OK
+	.dram_sdqs3   =  0x00000030,		// OK
+	.dram_sdqs4   =  0x00000030,		// OK
+	.dram_sdqs5   =  0x00000030,		// OK
+	.dram_sdqs6   =  0x00000030,		// OK
+	.dram_sdqs7   =  0x00000030,		// OK
+	.dram_dqm0    =  0x00000030,		// OK
+	.dram_dqm1    =  0x00000030,		// OK
+	.dram_dqm2    =  0x00000030,		// OK
+	.dram_dqm3    =  0x00000030,		// OK
+	.dram_dqm4    =  0x00000030,		// OK
+	.dram_dqm5    =  0x00000030,		// OK
+	.dram_dqm6    =  0x00000030,		// OK
+	.dram_dqm7    =  0x00000030,		// OK
 };
 
 static const struct mx6dq_iomux_grp_regs mx6q_grp_ioregs = {
-	.grp_ddr_type =  0x000C0000,		// OK
+	.grp_ddr_type    =  0x000C0000,		// OK
 	.grp_ddrmode_ctl =  0x00020000,		// OK
-	.grp_ddrpke = 0x00000000,			// OK
-	.grp_addds =  0x00000030,			// OK
-	.grp_ctlds =  0x00000030,			// OK
-	.grp_ddrmode = 0x00020000,			// OK
-	.grp_b0ds =  0x00000030,			// OK
-	.grp_b1ds =  0x00000030,			// OK
-	.grp_b2ds =  0x00000030,			// OK
-	.grp_b3ds =  0x00000030,			// OK
-	.grp_b4ds =  0x00000030,			// OK
-	.grp_b5ds =  0x00000030,			// OK
-	.grp_b6ds =  0x00000030,			// OK
-	.grp_b7ds =  0x00000030,			// OK
+	.grp_ddrpke      =  0x00000000,		// OK
+	.grp_addds       =  0x00000030,		// OK
+	.grp_ctlds       =  0x00000030,		// OK
+	.grp_ddrmode     =  0x00020000,		// OK
+	.grp_b0ds        =  0x00000030,		// OK
+	.grp_b1ds        =  0x00000030,		// OK
+	.grp_b2ds        =  0x00000030,		// OK
+	.grp_b3ds        =  0x00000030,		// OK
+	.grp_b4ds        =  0x00000030,		// OK
+	.grp_b5ds        =  0x00000030,		// OK
+	.grp_b6ds        =  0x00000030,		// OK
+	.grp_b7ds        =  0x00000030,		// OK
 };
 
-static const struct mx6sdl_iomux_grp_regs mx6sdl_grp_ioregs = {
-	.grp_ddr_type = 0x000c0000,			// FIXME
-	.grp_ddrmode_ctl = 0x00020000,		// FIXME
-	.grp_ddrpke = 0x00000000,			// FIXME
-	.grp_addds = 0x00000028,			// FIXME
-	.grp_ctlds = 0x00000028,			// FIXME
-	.grp_ddrmode = 0x00020000,			// FIXME
-	.grp_b0ds = 0x00000028,				// FIXME
-	.grp_b1ds = 0x00000028,				// FIXME
-	.grp_b2ds = 0x00000028,				// FIXME
-	.grp_b3ds = 0x00000028,				// FIXME
-	.grp_b4ds = 0x00000028,				// FIXME
-	.grp_b5ds = 0x00000028,				// FIXME
-	.grp_b6ds = 0x00000028,				// FIXME
-	.grp_b7ds = 0x00000028,				// FIXME
+static const struct mx6sdl_iomux_ddr_regs mx6dl_ddr_ioregs = {
+	.dram_sdclk_0 =  0x00000030,		// FIXME
+	.dram_sdclk_1 =  0x00000030,		// FIXME
+	.dram_cas     =  0x00000030,		// FIXME
+	.dram_ras     =  0x00000030,		// FIXME
+	.dram_reset   =  0x00000030,		// FIXME
+	.dram_sdcke0  =  0x00003000,		// FIXME
+	.dram_sdcke1  =  0x00003000,		// FIXME
+	.dram_sdba2   =  0x00000000,		// FIXME
+	.dram_sdodt0  =  0x00000030,		// FIXME
+	.dram_sdodt1  =  0x00000030,		// FIXME
+	.dram_sdqs0   =  0x00000030,		// FIXME
+	.dram_sdqs1   =  0x00000030,		// FIXME
+	.dram_sdqs2   =  0x00000030,		// FIXME
+	.dram_sdqs3   =  0x00000030,		// FIXME
+	.dram_sdqs4   =  0x00000030,		// FIXME
+	.dram_sdqs5   =  0x00000030,		// FIXME
+	.dram_sdqs6   =  0x00000030,		// FIXME
+	.dram_sdqs7   =  0x00000030,		// FIXME
+	.dram_dqm0    =  0x00000030,		// FIXME
+	.dram_dqm1    =  0x00000030,		// FIXME
+	.dram_dqm2    =  0x00000030,		// FIXME
+	.dram_dqm3    =  0x00000030,		// FIXME
+	.dram_dqm4    =  0x00000030,		// FIXME
+	.dram_dqm5    =  0x00000030,		// FIXME
+	.dram_dqm6    =  0x00000030,		// FIXME
+	.dram_dqm7    =  0x00000030,		// FIXME
 };
 
-/* SOM with Quad processor and 2GB memory */
-static const struct mx6_mmdc_calibration mx6q_2g_mmcd_calib = {
-	.p0_mpwldectrl0 =  0x001F001F,			// OK
-	.p0_mpwldectrl1 =  0x001F001F,			// OK
-	.p1_mpwldectrl0 =  0x001F001F,			// OK
-	.p1_mpwldectrl1 =  0x001F001F,			// OK
-	.p0_mpdgctrl0 =    0x4333033F,			// OK
-	.p0_mpdgctrl1 =    0x032C031D,			// OK
-	.p1_mpdgctrl0 =    0x43200332,			// OK
-	.p1_mpdgctrl1 =    0x031A026A,			// OK
-	.p0_mprddlctl =    0x4D464746,			// OK
-	.p1_mprddlctl =    0x47453F4D,			// OK
-	.p0_mpwrdlctl =    0x3E434440,			// OK
-	.p1_mpwrdlctl =    0x47384839,			// OK
+static const struct mx6sdl_iomux_grp_regs mx6dl_grp_ioregs = {
+	.grp_ddr_type    =  0x000C0000,		// FIXME
+	.grp_ddrmode_ctl =  0x00020000,		// FIXME
+	.grp_ddrpke      =  0x00000000,		// FIXME
+	.grp_addds       =  0x00000030,		// FIXME
+	.grp_ctlds       =  0x00000030,		// FIXME
+	.grp_ddrmode     =  0x00020000,		// FIXME
+	.grp_b0ds        =  0x00000030,		// FIXME
+	.grp_b1ds        =  0x00000030,		// FIXME
+	.grp_b2ds        =  0x00000030,		// FIXME
+	.grp_b3ds        =  0x00000030,		// FIXME
+	.grp_b4ds        =  0x00000030,		// FIXME
+	.grp_b5ds        =  0x00000030,		// FIXME
+	.grp_b6ds        =  0x00000030,		// FIXME
+	.grp_b7ds        =  0x00000030,		// FIXME
 };
 
-/* SOM with Dual processor and 1GB memory */
-static const struct mx6_mmdc_calibration mx6q_1g_mmcd_calib = {
-	.p0_mpwldectrl0 =  0x001F001F,			// OK
-	.p0_mpwldectrl1 =  0x001F001F,			// OK
-	.p1_mpwldectrl0 =  0x001F001F,			// OK
-	.p1_mpwldectrl1 =  0x001F001F,			// OK
-	.p0_mpdgctrl0 =    0x4333033F,			// OK
-	.p0_mpdgctrl1 =    0x032C031D,			// OK
-	.p1_mpdgctrl0 =    0x43200332,			// OK
-	.p1_mpdgctrl1 =    0x031A026A,			// OK
-	.p0_mprddlctl =    0x4D464746,			// OK
-	.p1_mprddlctl =    0x47453F4D,			// OK
-	.p0_mpwrdlctl =    0x3E434440,			// OK
-	.p1_mpwrdlctl =    0x47384839,			// OK
+/* SOM with Dual/Quad processors */
+static const struct mx6_mmdc_calibration mx6q_mmcd_calib = {
+	.p0_mpwldectrl0 =  0x001F001F,		// OK
+	.p0_mpwldectrl1 =  0x001F001F,		// OK
+	.p0_mpdgctrl0   =  0x4333033F,		// OK
+	.p0_mpdgctrl1   =  0x032C031D,		// OK
+	.p0_mprddlctl   =  0x4D464746,		// OK
+	.p0_mpwrdlctl   =  0x3E434440,		// OK
+	.p1_mpwldectrl0 =  0x001F001F,		// OK
+	.p1_mpwldectrl1 =  0x001F001F,		// OK
+	.p1_mpdgctrl0   =  0x43200332,		// OK
+	.p1_mpdgctrl1   =  0x031A026A,		// OK
+	.p1_mprddlctl   =  0x47453F4D,		// OK
+	.p1_mpwrdlctl   =  0x47384839,		// OK
 };
 
-/* SOM with Solo processor and 512MB memory */
-static const struct mx6_mmdc_calibration mx6dl_512m_mmcd_calib = {
-	.p0_mpwldectrl0 = 0x0045004D,			// FIXME
-	.p0_mpwldectrl1 = 0x003A0047,			// FIXME
-	.p0_mpdgctrl0 =   0x023C0224,			// FIXME
-	.p0_mpdgctrl1 =   0x02000220,			// FIXME
-	.p0_mprddlctl =   0x44444846,			// FIXME
-	.p0_mpwrdlctl =   0x32343032,			// FIXME
+/* SOM with Solo/Dual Lite processors */
+static const struct mx6_mmdc_calibration mx6dl_mmcd_calib = {
+	.p0_mpwldectrl0 =  0x0045004D,		// FIXME
+	.p0_mpwldectrl1 =  0x003A0047,		// FIXME
+	.p0_mpdgctrl0 =    0x023C0224,		// FIXME
+	.p0_mpdgctrl1 =    0x02000220,		// FIXME
+	.p0_mprddlctl =    0x44444846,		// FIXME
+	.p0_mpwrdlctl =    0x32343032,		// FIXME
+	.p1_mpwldectrl0 =  0x001F001F,		// FIXME
+	.p1_mpwldectrl1 =  0x00210035,		// FIXME
+	.p1_mpdgctrl0 =    0x02200220,		// FIXME
+	.p1_mpdgctrl1 =    0x02000220,		// FIXME
+	.p1_mprddlctl =    0x4042463C,		// FIXME
+	.p1_mpwrdlctl =    0x36363430,		// FIXME
 };
 
-/* SOM with Dual lite processor and 1GB memory */
-static const struct mx6_mmdc_calibration mx6dl_1g_mmcd_calib = {
-	.p0_mpwldectrl0 =  0x0045004D,			// FIXME
-	.p0_mpwldectrl1 =  0x003A0047,			// FIXME
-	.p1_mpwldectrl0 =  0x001F001F,			// FIXME
-	.p1_mpwldectrl1 =  0x00210035,			// FIXME
-	.p0_mpdgctrl0 =    0x023C0224,			// FIXME
-	.p0_mpdgctrl1 =    0x02000220,			// FIXME
-	.p1_mpdgctrl0 =    0x02200220,			// FIXME
-	.p1_mpdgctrl1 =    0x02000220,			// FIXME
-	.p0_mprddlctl =    0x44444846,			// FIXME
-	.p1_mprddlctl =    0x4042463C,			// FIXME
-	.p0_mpwrdlctl =    0x32343032,			// FIXME
-	.p1_mpwrdlctl =    0x36363430,			// FIXME
-};
 
-/* 4x MT41K256M16HA-125:E */
+/* MT41K256M16HA-125:E */
 static struct mx6_ddr3_cfg mem_ddr_4g = {
-	.mem_speed = 1600,				// OK
-	.density   = 4,					// OK
-	.width     = 16,				// OK
-	.banks     = 8,					// OK
-	.rowaddr   = 15,				// OK
-	.coladdr   = 10,				// OK
-	.pagesz    = 2,					// OK
-	.trcd      = 1375,				// OK
-	.trcmin    = 4875,				// OK
-	.trasmin   = 3500,				// OK
-	.SRT       = 0,					// OK
-};
-
-/* 2x MT41K256M16HA-125:E */
-static struct mx6_ddr3_cfg mem_ddr_2g = {
-	.mem_speed = 1600,				// OK
-	.density   = 2,					// OK
-	.width     = 16,				// OK
-	.banks     = 8,					// OK
-	.rowaddr   = 14,				// OK
-	.coladdr   = 10,				// OK
-	.pagesz    = 2,					// OK
-	.trcd      = 1375,				// OK
-	.trcmin    = 4875,				// OK
-	.trasmin   = 3500,				// OK
-	.SRT       = 0,					// OK
+	.mem_speed = 1600,					// OK
+	.density   = 4,						// OK
+	.width     = 16,					// OK
+	.banks     = 8,						// OK
+	.rowaddr   = 15,					// OK
+	.coladdr   = 10,					// OK
+	.pagesz    = 2,						// OK
+	.trcd      = 1375,					// OK
+	.trcmin    = 4875,					// OK
+	.trasmin   = 3500,					// OK
+	.SRT       = 0,						// OK
 };
 
 static void ccgr_init(void)
@@ -532,18 +523,15 @@ static void spl_dram_init(int width)
 	};
 
 	if (is_cpu_type(MXC_CPU_MX6D) || is_cpu_type(MXC_CPU_MX6Q))
+	{
 		mx6dq_dram_iocfg(width, &mx6q_ddr_ioregs, &mx6q_grp_ioregs);
+		mx6_dram_cfg(&sysinfo, &mx6q_mmcd_calib,  &mem_ddr_4g);
+	}
 	else
-		mx6sdl_dram_iocfg(width, &mx6dl_ddr_ioregs, &mx6sdl_grp_ioregs);
-
-	if (is_cpu_type(MXC_CPU_MX6D))
-		mx6_dram_cfg(&sysinfo, &mx6q_1g_mmcd_calib, &mem_ddr_2g);
-	else if (is_cpu_type(MXC_CPU_MX6Q))
-		mx6_dram_cfg(&sysinfo, &mx6q_2g_mmcd_calib, &mem_ddr_4g);
-	else if (is_cpu_type(MXC_CPU_MX6DL))
-		mx6_dram_cfg(&sysinfo, &mx6q_1g_mmcd_calib, &mem_ddr_2g);
-	else if (is_cpu_type(MXC_CPU_MX6SOLO))
-		mx6_dram_cfg(&sysinfo, &mx6dl_512m_mmcd_calib, &mem_ddr_2g);
+	{
+		mx6sdl_dram_iocfg(width, &mx6dl_ddr_ioregs, &mx6dl_grp_ioregs);
+		mx6_dram_cfg(&sysinfo, &mx6dl_mmcd_calib, &mem_ddr_4g);
+	}
 }
 
 void board_init_f(ulong dummy)
@@ -554,7 +542,7 @@ void board_init_f(ulong dummy)
 	ccgr_init();
 	gpr_init();
 
-	/* iomux and setup of i2c */
+	/* iomux and setup of uart */
 	board_early_init_f();
 
 	/* setup GP timer */
@@ -564,10 +552,41 @@ void board_init_f(ulong dummy)
 	preloader_console_init();
 
 	/* DDR initialization */
-	if (is_cpu_type(MXC_CPU_MX6SOLO))
-		spl_dram_init(32);
-	else
+#ifndef TURING_SMART_VARIANT
+	if (is_cpu_type(MXC_CPU_MX6Q)) {
+		printf("Configuring DDR3 for i.MX6 Quad\n");
 		spl_dram_init(64);
+	}
+	else if (is_cpu_type(MXC_CPU_MX6D)) {
+		printf("Configuring DDR3 for i.MX6 Dual\n");
+		spl_dram_init(32);
+	}
+	else if (is_cpu_type(MXC_CPU_MX6DL)) {
+		printf("Configuring DDR3 for i.MX6 Dual Lite\n");
+		spl_dram_init(32);
+	}
+	else if (is_cpu_type(MXC_CPU_MX6SOLO)) {
+		printf("Configuring DDR3 for i.MX6 Solo\n");
+		spl_dram_init(16);
+	}
+#else
+	if (is_cpu_type(MXC_CPU_MX6Q)) {
+		printf("Configuring DDR3 for i.MX6 Quad Smart\n");
+		spl_dram_init(32);
+	}
+	else if (is_cpu_type(MXC_CPU_MX6D)) {
+		printf("Configuring DDR3 for i.MX6 Dual\n");
+		spl_dram_init(32);
+	}
+	else if (is_cpu_type(MXC_CPU_MX6DL)) {
+		printf("Configuring DDR3 for i.MX6 Dual Lite Smart\n");
+		spl_dram_init(16);
+	}
+	else if (is_cpu_type(MXC_CPU_MX6SOLO)) {
+		printf("Configuring DDR3 for i.MX6 Solo\n");
+		spl_dram_init(16);
+	}
+#endif
 
 	/* Clear the BSS. */
 	memset(__bss_start, 0, __bss_end - __bss_start);
