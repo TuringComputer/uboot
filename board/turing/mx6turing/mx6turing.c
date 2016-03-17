@@ -42,17 +42,17 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#define UART_PAD_CTRL  (PAD_CTL_PUS_100K_UP |			\
-	PAD_CTL_SPEED_MED | PAD_CTL_DSE_40ohm |			\
-	PAD_CTL_SRE_FAST  | PAD_CTL_HYS)
+#define UART_PAD_CTRL  (PAD_CTL_PUS_100K_UP |						\
+						PAD_CTL_SPEED_MED   | PAD_CTL_DSE_40ohm |	\
+						PAD_CTL_SRE_FAST    | PAD_CTL_HYS)
 
-#define USDHC_PAD_CTRL (PAD_CTL_PUS_47K_UP |			\
-	PAD_CTL_SPEED_LOW | PAD_CTL_DSE_80ohm |			\
-	PAD_CTL_SRE_FAST  | PAD_CTL_HYS)
+#define USDHC_PAD_CTRL (PAD_CTL_PUS_47K_UP |						\
+						PAD_CTL_SPEED_LOW  | PAD_CTL_DSE_80ohm |	\
+						PAD_CTL_SRE_FAST   | PAD_CTL_HYS)
 
-#define I2C_PAD_CTRL  (PAD_CTL_PUS_100K_UP |			\
-	PAD_CTL_SPEED_MED | PAD_CTL_DSE_40ohm | PAD_CTL_HYS |	\
-	PAD_CTL_ODE | PAD_CTL_SRE_FAST)
+#define I2C_PAD_CTRL   (PAD_CTL_PUS_100K_UP |									\
+					    PAD_CTL_SPEED_MED   | PAD_CTL_DSE_40ohm | PAD_CTL_HYS |	\
+					    PAD_CTL_ODE 	    | PAD_CTL_SRE_FAST)
 
 #define I2C_PMIC	1
 
@@ -329,10 +329,15 @@ int checkboard(void)
 
 int board_late_init(void)
 {
+	// Defines the processor family, to load the correct device tree binaries
 	if (is_cpu_type(MXC_CPU_MX6Q) || is_cpu_type(MXC_CPU_MX6D))
+	{
 		setenv("board_rev", "MX6Q");
+	}
 	else
+	{
 		setenv("board_rev", "MX6DL");
+	}
 
 	return 0;
 }
@@ -340,143 +345,143 @@ int board_late_init(void)
 #ifdef CONFIG_SPL_BUILD
 #include <asm/arch/mx6-ddr.h>
 static const struct mx6dq_iomux_ddr_regs mx6q_ddr_ioregs = {
-	.dram_sdclk_0 =  0x00000030,		// OK
-	.dram_sdclk_1 =  0x00000030,		// OK
-	.dram_cas     =  0x00000030,		// OK
-	.dram_ras     =  0x00000030,		// OK
-	.dram_reset   =  0x00000030,		// OK
-	.dram_sdcke0  =  0x00003000,		// N/A
-	.dram_sdcke1  =  0x00003000,		// N/A
-	.dram_sdba2   =  0x00000000,		// OK
-	.dram_sdodt0  =  0x00000030,		// OK
-	.dram_sdodt1  =  0x00000030,		// OK
-	.dram_sdqs0   =  0x00000030,		// OK
-	.dram_sdqs1   =  0x00000030,		// OK
-	.dram_sdqs2   =  0x00000030,		// OK
-	.dram_sdqs3   =  0x00000030,		// OK
-	.dram_sdqs4   =  0x00000030,		// OK
-	.dram_sdqs5   =  0x00000030,		// OK
-	.dram_sdqs6   =  0x00000030,		// OK
-	.dram_sdqs7   =  0x00000030,		// OK
-	.dram_dqm0    =  0x00000030,		// OK
-	.dram_dqm1    =  0x00000030,		// OK
-	.dram_dqm2    =  0x00000030,		// OK
-	.dram_dqm3    =  0x00000030,		// OK
-	.dram_dqm4    =  0x00000030,		// OK
-	.dram_dqm5    =  0x00000030,		// OK
-	.dram_dqm6    =  0x00000030,		// OK
-	.dram_dqm7    =  0x00000030,		// OK
+	.dram_sdclk_0 =  0x00000030,
+	.dram_sdclk_1 =  0x00000030,
+	.dram_cas     =  0x00000030,
+	.dram_ras     =  0x00000030,
+	.dram_reset   =  0x00000030,
+	.dram_sdcke0  =  0x00003000,
+	.dram_sdcke1  =  0x00003000,
+	.dram_sdba2   =  0x00000000,
+	.dram_sdodt0  =  0x00000030,
+	.dram_sdodt1  =  0x00000030,
+	.dram_sdqs0   =  0x00000030,
+	.dram_sdqs1   =  0x00000030,
+	.dram_sdqs2   =  0x00000030,
+	.dram_sdqs3   =  0x00000030,
+	.dram_sdqs4   =  0x00000030,
+	.dram_sdqs5   =  0x00000030,
+	.dram_sdqs6   =  0x00000030,
+	.dram_sdqs7   =  0x00000030,
+	.dram_dqm0    =  0x00000030,
+	.dram_dqm1    =  0x00000030,
+	.dram_dqm2    =  0x00000030,
+	.dram_dqm3    =  0x00000030,
+	.dram_dqm4    =  0x00000030,
+	.dram_dqm5    =  0x00000030,
+	.dram_dqm6    =  0x00000030,
+	.dram_dqm7    =  0x00000030,
 };
 
 static const struct mx6dq_iomux_grp_regs mx6q_grp_ioregs = {
-	.grp_ddr_type    =  0x000C0000,		// OK
-	.grp_ddrmode_ctl =  0x00020000,		// OK
-	.grp_ddrpke      =  0x00000000,		// OK
-	.grp_addds       =  0x00000030,		// OK
-	.grp_ctlds       =  0x00000030,		// OK
-	.grp_ddrmode     =  0x00020000,		// OK
-	.grp_b0ds        =  0x00000030,		// OK
-	.grp_b1ds        =  0x00000030,		// OK
-	.grp_b2ds        =  0x00000030,		// OK
-	.grp_b3ds        =  0x00000030,		// OK
-	.grp_b4ds        =  0x00000030,		// OK
-	.grp_b5ds        =  0x00000030,		// OK
-	.grp_b6ds        =  0x00000030,		// OK
-	.grp_b7ds        =  0x00000030,		// OK
+	.grp_ddr_type    =  0x000C0000,
+	.grp_ddrmode_ctl =  0x00020000,
+	.grp_ddrpke      =  0x00000000,
+	.grp_addds       =  0x00000030,
+	.grp_ctlds       =  0x00000030,
+	.grp_ddrmode     =  0x00020000,
+	.grp_b0ds        =  0x00000030,
+	.grp_b1ds        =  0x00000030,
+	.grp_b2ds        =  0x00000030,
+	.grp_b3ds        =  0x00000030,
+	.grp_b4ds        =  0x00000030,
+	.grp_b5ds        =  0x00000030,
+	.grp_b6ds        =  0x00000030,
+	.grp_b7ds        =  0x00000030,
 };
 
 static const struct mx6sdl_iomux_ddr_regs mx6dl_ddr_ioregs = {
-	.dram_sdclk_0 =  0x00000030,		// FIXME
-	.dram_sdclk_1 =  0x00000030,		// FIXME
-	.dram_cas     =  0x00000030,		// FIXME
-	.dram_ras     =  0x00000030,		// FIXME
-	.dram_reset   =  0x00000030,		// FIXME
-	.dram_sdcke0  =  0x00003000,		// FIXME
-	.dram_sdcke1  =  0x00003000,		// FIXME
-	.dram_sdba2   =  0x00000000,		// FIXME
-	.dram_sdodt0  =  0x00000030,		// FIXME
-	.dram_sdodt1  =  0x00000030,		// FIXME
-	.dram_sdqs0   =  0x00000030,		// FIXME
-	.dram_sdqs1   =  0x00000030,		// FIXME
-	.dram_sdqs2   =  0x00000030,		// FIXME
-	.dram_sdqs3   =  0x00000030,		// FIXME
-	.dram_sdqs4   =  0x00000030,		// FIXME
-	.dram_sdqs5   =  0x00000030,		// FIXME
-	.dram_sdqs6   =  0x00000030,		// FIXME
-	.dram_sdqs7   =  0x00000030,		// FIXME
-	.dram_dqm0    =  0x00000030,		// FIXME
-	.dram_dqm1    =  0x00000030,		// FIXME
-	.dram_dqm2    =  0x00000030,		// FIXME
-	.dram_dqm3    =  0x00000030,		// FIXME
-	.dram_dqm4    =  0x00000030,		// FIXME
-	.dram_dqm5    =  0x00000030,		// FIXME
-	.dram_dqm6    =  0x00000030,		// FIXME
-	.dram_dqm7    =  0x00000030,		// FIXME
+	.dram_sdclk_0 =  0x00000030,
+	.dram_sdclk_1 =  0x00000030,
+	.dram_cas     =  0x00000030,
+	.dram_ras     =  0x00000030,
+	.dram_reset   =  0x00000030,
+	.dram_sdcke0  =  0x00003000,
+	.dram_sdcke1  =  0x00003000,
+	.dram_sdba2   =  0x00000000,
+	.dram_sdodt0  =  0x00000030,
+	.dram_sdodt1  =  0x00000030,
+	.dram_sdqs0   =  0x00000030,
+	.dram_sdqs1   =  0x00000030,
+	.dram_sdqs2   =  0x00000030,
+	.dram_sdqs3   =  0x00000030,
+	.dram_sdqs4   =  0x00000030,
+	.dram_sdqs5   =  0x00000030,
+	.dram_sdqs6   =  0x00000030,
+	.dram_sdqs7   =  0x00000030,
+	.dram_dqm0    =  0x00000030,
+	.dram_dqm1    =  0x00000030,
+	.dram_dqm2    =  0x00000030,
+	.dram_dqm3    =  0x00000030,
+	.dram_dqm4    =  0x00000030,
+	.dram_dqm5    =  0x00000030,
+	.dram_dqm6    =  0x00000030,
+	.dram_dqm7    =  0x00000030,
 };
 
 static const struct mx6sdl_iomux_grp_regs mx6dl_grp_ioregs = {
-	.grp_ddr_type    =  0x000C0000,		// FIXME
-	.grp_ddrmode_ctl =  0x00020000,		// FIXME
-	.grp_ddrpke      =  0x00000000,		// FIXME
-	.grp_addds       =  0x00000030,		// FIXME
-	.grp_ctlds       =  0x00000030,		// FIXME
-	.grp_ddrmode     =  0x00020000,		// FIXME
-	.grp_b0ds        =  0x00000030,		// FIXME
-	.grp_b1ds        =  0x00000030,		// FIXME
-	.grp_b2ds        =  0x00000030,		// FIXME
-	.grp_b3ds        =  0x00000030,		// FIXME
-	.grp_b4ds        =  0x00000030,		// FIXME
-	.grp_b5ds        =  0x00000030,		// FIXME
-	.grp_b6ds        =  0x00000030,		// FIXME
-	.grp_b7ds        =  0x00000030,		// FIXME
+	.grp_ddr_type    =  0x000C0000,
+	.grp_ddrmode_ctl =  0x00020000,
+	.grp_ddrpke      =  0x00000000,
+	.grp_addds       =  0x00000030,
+	.grp_ctlds       =  0x00000030,
+	.grp_ddrmode     =  0x00020000,
+	.grp_b0ds        =  0x00000030,
+	.grp_b1ds        =  0x00000030,
+	.grp_b2ds        =  0x00000030,
+	.grp_b3ds        =  0x00000030,
+	.grp_b4ds        =  0x00000030,
+	.grp_b5ds        =  0x00000030,
+	.grp_b6ds        =  0x00000030,
+	.grp_b7ds        =  0x00000030,
 };
 
 /* SOM with Dual/Quad processors */
 static const struct mx6_mmdc_calibration mx6q_mmcd_calib = {
-	.p0_mpwldectrl0 =  0x001F001F,		// OK
-	.p0_mpwldectrl1 =  0x001F001F,		// OK
-	.p0_mpdgctrl0   =  0x4333033F,		// OK
-	.p0_mpdgctrl1   =  0x032C031D,		// OK
-	.p0_mprddlctl   =  0x4D464746,		// OK
-	.p0_mpwrdlctl   =  0x3E434440,		// OK
-	.p1_mpwldectrl0 =  0x001F001F,		// OK
-	.p1_mpwldectrl1 =  0x001F001F,		// OK
-	.p1_mpdgctrl0   =  0x43200332,		// OK
-	.p1_mpdgctrl1   =  0x031A026A,		// OK
-	.p1_mprddlctl   =  0x47453F4D,		// OK
-	.p1_mpwrdlctl   =  0x47384839,		// OK
+	.p0_mpwldectrl0 =  0x001F001F,
+	.p0_mpwldectrl1 =  0x001F001F,
+	.p0_mpdgctrl0   =  0x4333033F,
+	.p0_mpdgctrl1   =  0x032C031D,
+	.p0_mprddlctl   =  0x4D464746,
+	.p0_mpwrdlctl   =  0x3E434440,
+	.p1_mpwldectrl0 =  0x001F001F,
+	.p1_mpwldectrl1 =  0x001F001F,
+	.p1_mpdgctrl0   =  0x43200332,
+	.p1_mpdgctrl1   =  0x031A026A,
+	.p1_mprddlctl   =  0x47453F4D,
+	.p1_mpwrdlctl   =  0x47384839,
 };
 
 /* SOM with Solo/Dual Lite processors */
 static const struct mx6_mmdc_calibration mx6dl_mmcd_calib = {
-	.p0_mpwldectrl0 =  0x0045004D,		// FIXME
-	.p0_mpwldectrl1 =  0x003A0047,		// FIXME
-	.p0_mpdgctrl0 =    0x023C0224,		// FIXME
-	.p0_mpdgctrl1 =    0x02000220,		// FIXME
-	.p0_mprddlctl =    0x44444846,		// FIXME
-	.p0_mpwrdlctl =    0x32343032,		// FIXME
-	.p1_mpwldectrl0 =  0x001F001F,		// FIXME
-	.p1_mpwldectrl1 =  0x00210035,		// FIXME
-	.p1_mpdgctrl0 =    0x02200220,		// FIXME
-	.p1_mpdgctrl1 =    0x02000220,		// FIXME
-	.p1_mprddlctl =    0x4042463C,		// FIXME
-	.p1_mpwrdlctl =    0x36363430,		// FIXME
+	.p0_mpwldectrl0 =  0x0045004D,
+	.p0_mpwldectrl1 =  0x003A0047,
+	.p0_mpdgctrl0 =    0x023C0224,
+	.p0_mpdgctrl1 =    0x02000220,
+	.p0_mprddlctl =    0x44444846,
+	.p0_mpwrdlctl =    0x32343032,
+	.p1_mpwldectrl0 =  0x001F001F,
+	.p1_mpwldectrl1 =  0x00210035,
+	.p1_mpdgctrl0 =    0x02200220,
+	.p1_mpdgctrl1 =    0x02000220,
+	.p1_mprddlctl =    0x4042463C,
+	.p1_mpwrdlctl =    0x36363430,
 };
 
 
 /* MT41K256M16HA-125:E */
 static struct mx6_ddr3_cfg mem_ddr_4g = {
-	.mem_speed = 1600,					// OK
-	.density   = 4,						// OK
-	.width     = 16,					// OK
-	.banks     = 8,						// OK
-	.rowaddr   = 15,					// OK
-	.coladdr   = 10,					// OK
-	.pagesz    = 2,						// OK
-	.trcd      = 1375,					// OK
-	.trcmin    = 4875,					// OK
-	.trasmin   = 3500,					// OK
-	.SRT       = 0,						// OK
+	.mem_speed = 1600,
+	.density   = 4,
+	.width     = 16,
+	.banks     = 8,
+	.rowaddr   = 15,
+	.coladdr   = 10,
+	.pagesz    = 2,
+	.trcd      = 1375,
+	.trcmin    = 4875,
+	.trasmin   = 3500,
+	.SRT       = 0,
 };
 
 static void ccgr_init(void)

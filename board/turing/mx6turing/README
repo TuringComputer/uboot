@@ -18,3 +18,5 @@ sudo dd if=SPL of=/dev/mmcblk0 bs=1k seek=1; sync
 sudo dd if=u-boot.img of=/dev/mmcblk0 bs=1k seek=69; sync
 
 - Insert the SD card in the board, power it up and U-boot messages should come up.
+
+If you want to build for SMART variants (i.MX6Q 1GB and i.MX6DL 512MB), change it accordingly in the Kconfig file.
