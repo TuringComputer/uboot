@@ -301,6 +301,11 @@ int power_init_board(void)
 	reg = 0x72; // 0x72 = 3.3V
 	pmic_reg_write(p, PFUZE100_SW2VOL, reg);
 
+	/* Set SW4VOLT to 3.3V */
+	pmic_reg_read(p, PFUZE100_SW4VOL, &reg);
+	reg = 0x72; // 0x72 = 3.3V
+	pmic_reg_write(p, PFUZE100_SW4VOL, reg);
+
 	return 0;
 }
 
