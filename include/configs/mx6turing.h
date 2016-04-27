@@ -106,7 +106,6 @@
 
 #define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"script=boot.scr\0" 																							\
 	"image=zImage\0" 																								\
 	"fdtfile=undefined\0" 																							\
 	"fdt_addr_r=0x18000000\0" 																						\
@@ -117,19 +116,6 @@
 	"mmcdev=" __stringify(CONFIG_SYS_MMC_ENV_DEV1) "\0"																\
 	"mmcpart=1\0" 																									\
 	"mmcroot=" CONFIG_MMCROOT1 " rootwait rw\0" 																	\
-	"update_sd_firmware=" 																							\
-		"if test ${ip_dyn} = yes; then " 																			\
-			"setenv get_cmd dhcp; " 																				\
-		"else " 																									\
-			"setenv get_cmd tftp; " 																				\
-		"fi; " 																										\
-		"if mmc dev ${mmcdev}; then "																				\
-			"if ${get_cmd} ${update_sd_firmware_filename}; then " 													\
-				"setexpr fw_sz ${filesize} / 0x200; " 																\
-				"setexpr fw_sz ${fw_sz} + 1; "																		\
-				"mmc write ${loadaddr} 0x2 ${fw_sz}; " 																\
-			"fi; "																									\
-		"fi\0" 																										\
 	"mmcargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} root=${mmcroot}\0" 	\
 	"loadbootscript=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0" 										\
 	"bootscript=echo Running bootscript from mmc ...; source\0" 													\
@@ -184,28 +170,20 @@
 	"run findfdt; " 																								\
 	"mmc dev ${mmcdev}; " 																							\
 	"if mmc rescan; then " 																							\
-		"if run loadbootscript; then " 																				\
-			"run bootscript; "																						\
-		"else " 																									\
-			"if run loadimage; then " 																				\
-				"run mmcboot; " 																					\
+		"if run loadimage; then " 																					\
+			"run mmcboot; " 																						\
+		"else "																										\
+			"setenv mmcdev " __stringify(CONFIG_SYS_MMC_ENV_DEV2) "; "												\
+			"setenv mmcroot " __stringify(CONFIG_MMCROOT2) "; "														\
+			"mmc dev ${mmcdev}; " 																					\
+			"if mmc rescan; then " 																					\
+					"if run loadimage; then "																		\
+						"run mmcboot; " 																			\
+					"else "																							\
+						"run netboot; " 																			\
+					"fi; " 																							\
 			"else "																									\
-				"setenv mmcdev " __stringify(CONFIG_SYS_MMC_ENV_DEV2) "; "											\
-				"setenv mmcroot " __stringify(CONFIG_MMCROOT2) "; "													\
-				"mmc dev ${mmcdev}; " 																				\
-				"if mmc rescan; then " 																				\
-					"if run loadbootscript; then "																	\
-						"run bootscript; "																			\
-					"else " 																						\
-						"if run loadimage; then "																	\
-							"run mmcboot; " 																		\
-						"else "																						\
-							"run netboot; " 																		\
-						"fi; " 																						\
-					"fi; "																							\
-				"else "																								\
-					"run netboot; " 																				\
-				"fi; "																								\
+				"run netboot; " 																					\
 			"fi; "																									\
 		"fi; "																										\
 	"else "																											\
@@ -213,15 +191,11 @@
 		"setenv mmcroot " __stringify(CONFIG_MMCROOT2) "; "															\
 		"mmc dev ${mmcdev}; " 																						\
 		"if mmc rescan; then " 																						\
-			"if run loadbootscript; then "																			\
-				"run bootscript; "																					\
-			"else " 																								\
-				"if run loadimage; then "																			\
-					"run mmcboot; " 																				\
-				"else "																								\
-					"run netboot; " 																				\
-				"fi; " 																								\
-			"fi; "																									\
+			"if run loadimage; then "																				\
+				"run mmcboot; " 																					\
+			"else "																									\
+				"run netboot; " 																					\
+			"fi; " 																									\
 		"else "																										\
 			"run netboot; " 																						\
 		"fi; "																										\
