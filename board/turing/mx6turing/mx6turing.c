@@ -344,6 +344,35 @@ int board_late_init(void)
 		setenv("board_rev", "MX6DL");
 	}
 
+	/* Kernel Memory Allocation */
+#ifndef TURING_SMART_VARIANT
+	if (is_cpu_type(MXC_CPU_MX6Q)) {
+		setenv("bootargs_mem", "cma=320M");
+	}
+	else if (is_cpu_type(MXC_CPU_MX6D)) {
+		setenv("bootargs_mem", "cma=320M");
+	}
+	else if (is_cpu_type(MXC_CPU_MX6DL)) {
+		setenv("bootargs_mem", "cma=320M");
+	}
+	else if (is_cpu_type(MXC_CPU_MX6SOLO)) {
+		setenv("bootargs_mem", "cma=256M");
+	}
+#else
+	if (is_cpu_type(MXC_CPU_MX6Q)) {
+		setenv("bootargs_mem", "cma=320M");
+	}
+	else if (is_cpu_type(MXC_CPU_MX6D)) {
+		setenv("bootargs_mem", "cma=320M");
+	}
+	else if (is_cpu_type(MXC_CPU_MX6DL)) {
+		setenv("bootargs_mem", "cma=256M");
+	}
+	else if (is_cpu_type(MXC_CPU_MX6SOLO)) {
+		setenv("bootargs_mem", "cma=256M");
+	}
+#endif
+
 	return 0;
 }
 
