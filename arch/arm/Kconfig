@@ -523,6 +523,11 @@ config TARGET_MX6SABRESD
 	select CPU_V7
 	select SUPPORT_SPL
 
+config TARGET_MX6TURING
+	bool "Support Turing's i.MX6x boards"
+	select CPU_V7
+	select SUPPORT_SPL
+
 config TARGET_MX6SLEVK
 	bool "Support mx6slevk"
 	select CPU_V7
@@ -903,6 +908,7 @@ source "board/palmtreo680/Kconfig"
 source "board/phytec/pcm051/Kconfig"
 source "board/ppcag/bg0900/Kconfig"
 source "board/pxa255_idp/Kconfig"
+source "board/turing/mx6turing/Kconfig"
 source "board/samsung/smdk2410/Kconfig"
 source "board/sandisk/sansa_fuze_plus/Kconfig"
 source "board/scb9328/Kconfig"

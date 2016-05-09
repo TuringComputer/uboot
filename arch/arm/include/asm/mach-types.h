@@ -1108,6 +1108,9 @@ extern unsigned int __machine_arch_type;
 #define MACH_TYPE_KZM9G                4140
 #define MACH_TYPE_COLIBRI_T30          4493
 #define MACH_TYPE_APALIS_T30           4513
+#define MACH_TYPE_MX53_TURING          5064
+#define MACH_TYPE_MX6Q_TURING          5065
+#define MACH_TYPE_MX6DL_TURING         5066
 
 #ifdef CONFIG_ARCH_EBSA110
 # ifdef machine_arch_type
@@ -11655,6 +11658,42 @@ extern unsigned int __machine_arch_type;
 # define machine_is_mx53_loco()	(machine_arch_type == MACH_TYPE_MX53_LOCO)
 #else
 # define machine_is_mx53_loco()	(0)
+#endif
+
+#ifdef CONFIG_MACH_MX53_TURING
+# ifdef machine_arch_type
+#  undef machine_arch_type
+#  define machine_arch_type	__machine_arch_type
+# else
+#  define machine_arch_type	MACH_TYPE_MX53_TURING
+# endif
+# define machine_is_mx53_turing()	(machine_arch_type == MACH_TYPE_MX53_TURING)
+#else
+# define machine_is_mx53_turing()	(0)
+#endif
+
+#ifdef CONFIG_MACH_MX6Q_TURING
+# ifdef machine_arch_type
+#  undef machine_arch_type
+#  define machine_arch_type	__machine_arch_type
+# else
+#  define machine_arch_type	MACH_TYPE_MX6Q_TURING
+# endif
+# define machine_is_mx6q_turing()	(machine_arch_type == MACH_TYPE_MX6Q_TURING)
+#else
+# define machine_is_mx6q_turing()	(0)
+#endif
+
+#ifdef CONFIG_MACH_MX6DL_TURING
+# ifdef machine_arch_type
+#  undef machine_arch_type
+#  define machine_arch_type	__machine_arch_type
+# else
+#  define machine_arch_type	MACH_TYPE_MX6DL_TURING
+# endif
+# define machine_is_mx6dl_turing()	(machine_arch_type == MACH_TYPE_MX6DL_TURING)
+#else
+# define machine_is_mx6dl_turing()	(0)
 #endif
 
 #ifdef CONFIG_MACH_ACER_A8
