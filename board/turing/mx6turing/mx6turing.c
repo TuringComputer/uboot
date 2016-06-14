@@ -108,6 +108,10 @@ static iomux_v3_cfg_t const i2c2_pads[] = {
 	IOMUX_PADS(PAD_KEY_ROW3__I2C2_SDA  | MUX_PAD_CTRL(I2C_PAD_CTRL)),
 };
 
+static iomux_v3_cfg_t const gpio_pads[] = {
+	IOMUX_PADS(PAD_ENET_MDIO__GPIO1_IO22  | MUX_PAD_CTRL(NO_PAD_CTRL)),
+};
+
 static struct i2c_pads_info i2cq_pad_info = {
 	.scl = {
 		.i2c_mode = MX6Q_PAD_KEY_COL3__I2C2_SCL | MUX_PAD_CTRL(I2C_PAD_CTRL),
@@ -243,6 +247,111 @@ int board_mmc_init(bd_t *bis)
 }
 #endif
 
+#if defined(CONFIG_VIDEO_IPUV3)
+
+#define DISP0_PWR_EN					IMX_GPIO_NR(1, 22)
+
+static void disable_lvds(struct display_info_t const *dev)
+{
+	struct iomuxc *iomux = (struct iomuxc *)IOMUXC_BASE_ADDR;
+
+	int reg = readl(&iomux->gpr[2]);
+
+	reg &= ~(IOMUXC_GPR2_LVDS_CH0_MODE_MASK | IOMUXC_GPR2_LVDS_CH1_MODE_MASK);
+
+	writel(reg, &iomux->gpr[2]);
+}
+
+static void enable_lvds(struct display_info_t const *dev)
+{
+	struct iomuxc *iomux = (struct iomuxc *) IOMUXC_BASE_ADDR;
+	u32 reg = readl(&iomux->gpr[2]);
+	reg |= (IOMUXC_GPR2_DATA_WIDTH_CH0_18BIT | IOMUXC_GPR2_DATA_WIDTH_CH1_18BIT);
+	writel(reg, &iomux->gpr[2]);
+	gpio_direction_output(DISP0_PWR_EN, 1);
+}
+
+struct display_info_t const displays[] = {
+	{
+		.bus	= -1,
+		.addr	= 0,
+		.pixfmt	= IPU_PIX_FMT_RGB666,
+		.detect	= NULL,
+		.enable	= enable_lvds,
+		.mode	= {
+			.name           = "atm0700l6bt",
+			.refresh        = 60,
+			.xres           = 800,
+			.yres           = 480,
+			.pixclock       = 30000,
+			.left_margin    = 46,
+			.right_margin   = 210,
+			.upper_margin   = 23,
+			.lower_margin   = 22,
+			.hsync_len      = 10,
+			.vsync_len      = 10,
+			.sync           = FB_SYNC_EXT,
+			.vmode          = FB_VMODE_NONINTERLACED
+		}
+	}
+};
+size_t display_count = ARRAY_SIZE(displays);
+
+static void setup_display(void)
+{
+	struct mxc_ccm_reg *mxc_ccm = (struct mxc_ccm_reg *)CCM_BASE_ADDR;
+	struct iomuxc *iomux = (struct iomuxc *)IOMUXC_BASE_ADDR;
+	int reg;
+
+	enable_ipu_clock();
+
+	/* Turn on LDB0, LDB1, IPU,IPU DI0 clocks */
+	reg = readl(&mxc_ccm->CCGR3);
+	reg |=  MXC_CCM_CCGR3_LDB_DI0_MASK | MXC_CCM_CCGR3_LDB_DI1_MASK;
+	writel(reg, &mxc_ccm->CCGR3);
+
+	/* set LDB0, LDB1 clk select to 011/011 */
+	reg = readl(&mxc_ccm->cs2cdr);
+	reg &= ~(MXC_CCM_CS2CDR_LDB_DI0_CLK_SEL_MASK | MXC_CCM_CS2CDR_LDB_DI1_CLK_SEL_MASK);
+	reg |= (3 << MXC_CCM_CS2CDR_LDB_DI0_CLK_SEL_OFFSET) | (3 << MXC_CCM_CS2CDR_LDB_DI1_CLK_SEL_OFFSET);
+	writel(reg, &mxc_ccm->cs2cdr);
+
+	reg = readl(&mxc_ccm->cscmr2);
+	reg |= MXC_CCM_CSCMR2_LDB_DI0_IPU_DIV | MXC_CCM_CSCMR2_LDB_DI1_IPU_DIV;
+	writel(reg, &mxc_ccm->cscmr2);
+
+	reg = readl(&mxc_ccm->chsccdr);
+	reg |= (CHSCCDR_CLK_SEL_LDB_DI0 << MXC_CCM_CHSCCDR_IPU1_DI0_CLK_SEL_OFFSET);
+	reg |= (CHSCCDR_CLK_SEL_LDB_DI0	<< MXC_CCM_CHSCCDR_IPU1_DI1_CLK_SEL_OFFSET);
+	writel(reg, &mxc_ccm->chsccdr);
+
+	reg = IOMUXC_GPR2_BGREF_RRMODE_EXTERNAL_RES
+	     | IOMUXC_GPR2_DI1_VS_POLARITY_ACTIVE_LOW
+	     | IOMUXC_GPR2_DI0_VS_POLARITY_ACTIVE_LOW
+	     | IOMUXC_GPR2_BIT_MAPPING_CH1_SPWG
+	     | IOMUXC_GPR2_DATA_WIDTH_CH1_18BIT
+	     | IOMUXC_GPR2_BIT_MAPPING_CH0_SPWG
+	     | IOMUXC_GPR2_DATA_WIDTH_CH0_18BIT
+	     | IOMUXC_GPR2_LVDS_CH0_MODE_DISABLED
+	     | IOMUXC_GPR2_LVDS_CH1_MODE_ENABLED_DI0;
+	writel(reg, &iomux->gpr[2]);
+
+	reg = readl(&iomux->gpr[3]);
+	reg = (reg & ~(IOMUXC_GPR3_LVDS1_MUX_CTL_MASK | IOMUXC_GPR3_HDMI_MUX_CTL_MASK))
+	    | (IOMUXC_GPR3_MUX_SRC_IPU1_DI0 << IOMUXC_GPR3_LVDS1_MUX_CTL_OFFSET);
+	writel(reg, &iomux->gpr[3]);
+}
+#endif /* CONFIG_VIDEO_IPUV3 */
+
+/*
+ * Do not overwrite the console
+ * Use always serial for U-Boot console
+ */
+int overwrite_console(void)
+{
+	return 1;
+}
+
 #ifdef CONFIG_USB_EHCI_MX6
 
 int board_ehci_hcd_init(int port)
@@ -255,8 +364,11 @@ int board_ehci_hcd_init(int port)
 int board_early_init_f(void)
 {
 	int ret = 0;
+	SETUP_IOMUX_PADS(gpio_pads);
 	setup_iomux_uart();
-
+#ifdef CONFIG_VIDEO_IPUV3
+	setup_display();
+#endif
 	return ret;
 }
 
