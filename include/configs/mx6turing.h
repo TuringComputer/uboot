@@ -116,7 +116,7 @@
 	"mmcdev=" __stringify(CONFIG_SYS_MMC_ENV_DEV1) "\0"																\
 	"mmcpart=1\0" 																									\
 	"mmcroot=" CONFIG_MMCROOT1 " rootwait rw\0" 																	\
-	"mmcargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} root=${mmcroot}\0" 	\
+	"mmcargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} root=${mmcroot} fbcon=map:<02>\0" 	\
 	"loadbootscript=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0" 										\
 	"bootscript=echo Running bootscript from mmc ...; source\0" 													\
 	"loadimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${image}\0" 											\
@@ -136,7 +136,7 @@
 		"else " 																									\
 			"bootz; " 																								\
 		"fi;\0" 																									\
-	"netargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} root=/dev/nfs ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp\0" \
+	"netargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} root=/dev/nfs ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp fbcon=map:<02>\0" \
 	"netboot=echo Booting from net ...; " 																			\
 		"run netargs; " 																							\
 		"if test ${ip_dyn} = yes; then " 																			\
