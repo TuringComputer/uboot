@@ -87,6 +87,17 @@
 #define CONFIG_USB_MAX_CONTROLLER_COUNT			2
 #define CONFIG_USB_KEYBOARD
 #define CONFIG_SYS_USB_EVENT_POLL
+#define CONFIG_USB_HOST_ETHER
+#define CONFIG_CMD_NET
+#define CONFIG_CMD_PING
+#define CONFIG_CMD_DHCP
+#define CONFIG_BOOTP_SUBNETMASK
+#define CONFIG_BOOTP_GATEWAY
+#define CONFIG_BOOTP_HOSTNAME
+#define CONFIG_BOOTP_BOOTPATH
+#define CONFIG_USB_ETHER_ASIX
+#define CONFIG_USB_ETHER_SMSC95XX
+#define CONFIG_USB_STORAGE
 
 #define CONFIG_SYS_NO_FLASH
 
@@ -138,6 +149,7 @@
 		"fi;\0" 																									\
 	"netargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} root=/dev/nfs ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp fbcon=map:<02>\0" \
 	"netboot=echo Booting from net ...; " 																			\
+		"usb start;"																								\
 		"run netargs; " 																							\
 		"if test ${ip_dyn} = yes; then " 																			\
 			"setenv get_cmd dhcp; " 																				\

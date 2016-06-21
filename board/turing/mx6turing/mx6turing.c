@@ -54,6 +54,10 @@ DECLARE_GLOBAL_DATA_PTR;
 					    PAD_CTL_SPEED_MED   | PAD_CTL_DSE_40ohm | PAD_CTL_HYS |	\
 					    PAD_CTL_ODE 	    | PAD_CTL_SRE_FAST)
 
+#define OTG_ID_PAD_CTRL (PAD_CTL_PKE | PAD_CTL_PUE |		\
+	PAD_CTL_PUS_47K_UP  | PAD_CTL_SPEED_LOW |				\
+	PAD_CTL_DSE_80ohm   | PAD_CTL_SRE_FAST  | PAD_CTL_HYS)
+
 #define I2C_PMIC	1
 
 #define GPIO_LED1				IMX_GPIO_NR(2, 3)
@@ -110,6 +114,7 @@ static iomux_v3_cfg_t const i2c2_pads[] = {
 
 static iomux_v3_cfg_t const gpio_pads[] = {
 	IOMUX_PADS(PAD_ENET_MDIO__GPIO1_IO22  | MUX_PAD_CTRL(NO_PAD_CTRL)),
+	IOMUX_PADS(PAD_EIM_D20__GPIO3_IO20  | MUX_PAD_CTRL(NO_PAD_CTRL)),
 };
 
 static struct i2c_pads_info i2cq_pad_info = {
@@ -137,6 +142,80 @@ static struct i2c_pads_info i2cdl_pad_info = {
 		.gp = IMX_GPIO_NR(4, 13)
 	}
 };
+
+#ifdef CONFIG_USB_EHCI_MX6
+
+#define USB_OTHERREGS_OFFSET			0x800
+#define UCTRL_PWR_POL					(1 << 9)
+#define USB_HUB_RSTn					IMX_GPIO_NR(3, 20)
+#define USB_OTG_PWR_EN					IMX_GPIO_NR(3, 22)
+
+/**
+ * USB OTG Pins (ID & PWR EN)
+ */
+static iomux_v3_cfg_t const usb_otg_pads[] = {
+	IOMUX_PADS(PAD_EIM_D22__USB_OTG_PWR   | MUX_PAD_CTRL(NO_PAD_CTRL)),
+	IOMUX_PADS(PAD_ENET_RX_ER__USB_OTG_ID | MUX_PAD_CTRL(OTG_ID_PAD_CTRL)),
+};
+
+/**
+ * USB Host Power Enable (Hub RSTn)
+ */
+static iomux_v3_cfg_t const usb_hc1_pads[] = {
+	IOMUX_PADS(PAD_ENET_TXD1__GPIO1_IO29 | MUX_PAD_CTRL(NO_PAD_CTRL)),
+};
+
+static void setup_usb(void)
+{
+	SETUP_IOMUX_PADS(usb_otg_pads);
+
+	/*
+	 * set daisy chain for otg_pin_id on 6q.
+	 * for 6dl, this bit is reserved
+	 */
+	imx_iomux_set_gpr_register(1, 13, 1, 0);
+
+	SETUP_IOMUX_PADS(usb_hc1_pads);
+
+	/**
+	 * Make sure the Hub is Enabled
+	 */
+	gpio_direction_output(USB_HUB_RSTn, 1);
+}
+
+int board_ehci_hcd_init(int port)
+{
+	u32 *usbnc_usb_ctrl;
+
+	if (port > 1)
+		return -EINVAL;
+
+	usbnc_usb_ctrl = (u32 *)(USB_BASE_ADDR + USB_OTHERREGS_OFFSET + port * 4);
+
+	setbits_le32(usbnc_usb_ctrl, UCTRL_PWR_POL);
+
+	return 0;
+}
+
+int board_ehci_power(int port, int on)
+{
+	switch (port) {
+	case 0:
+		break;
+	case 1:
+		if (on)
+			gpio_direction_output(USB_OTG_PWR_EN, 1);
+		else
+			gpio_direction_output(USB_OTG_PWR_EN, 0);
+		break;
+	default:
+		printf("MXC USB port %d not yet supported\n", port);
+		return -EINVAL;
+	}
+
+	return 0;
+}
+#endif
 
 static void setup_iomux_uart(void)
 {
@@ -352,15 +431,6 @@ int overwrite_console(void)
 	return 1;
 }
 
-#ifdef CONFIG_USB_EHCI_MX6
-
-int board_ehci_hcd_init(int port)
-{
-	return 0;
-}
-
-#endif
-
 int board_early_init_f(void)
 {
 	int ret = 0;
@@ -434,6 +504,10 @@ int board_init(void)
 	{
 		setup_i2c(1, CONFIG_SYS_I2C_SPEED, 0x7f, &i2cdl_pad_info);
 	}
+
+#ifdef CONFIG_USB_EHCI_MX6
+	setup_usb();
+#endif
 
 	return 0;
 }
