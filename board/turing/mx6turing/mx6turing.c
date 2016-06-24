@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Turing Computer, Ltda.
+ * Copyright (C) 2015 Turing Computer.
  *
  * Author: Mauricio Cirelli <mauricio@turingcomputer.com.br>
  *
@@ -60,11 +60,9 @@ DECLARE_GLOBAL_DATA_PTR;
 
 #define I2C_PMIC	1
 
-#define GPIO_LED1				IMX_GPIO_NR(2, 3)
-#define GPIO_LED2				IMX_GPIO_NR(2, 4)
-#define GPIO_LED3				IMX_GPIO_NR(2, 5)
-#define GPIO_LED4				IMX_GPIO_NR(6, 7)
-#define GPIO_LED5				IMX_GPIO_NR(2, 2)
+#define DISP0_PWR_EN			IMX_GPIO_NR(1, 22)
+#define USB_HUB_RSTn			IMX_GPIO_NR(3, 20)
+#define USB_OTG_PWR_EN			IMX_GPIO_NR(3, 22)
 
 int dram_init(void)
 {
@@ -147,8 +145,6 @@ static struct i2c_pads_info i2cdl_pad_info = {
 
 #define USB_OTHERREGS_OFFSET			0x800
 #define UCTRL_PWR_POL					(1 << 9)
-#define USB_HUB_RSTn					IMX_GPIO_NR(3, 20)
-#define USB_OTG_PWR_EN					IMX_GPIO_NR(3, 22)
 
 /**
  * USB OTG Pins (ID & PWR EN)
@@ -328,8 +324,6 @@ int board_mmc_init(bd_t *bis)
 
 #if defined(CONFIG_VIDEO_IPUV3)
 
-#define DISP0_PWR_EN					IMX_GPIO_NR(1, 22)
-
 static void disable_lvds(struct display_info_t const *dev)
 {
 	struct iomuxc *iomux = (struct iomuxc *)IOMUXC_BASE_ADDR;
@@ -352,9 +346,9 @@ static void enable_lvds(struct display_info_t const *dev)
 
 struct display_info_t const displays[] = {
 	{
-		.bus	= -1,
+		.bus	= 0,
 		.addr	= 0,
-		.pixfmt	= IPU_PIX_FMT_RGB666,
+		.pixfmt	= IPU_PIX_FMT_LVDS666,
 		.detect	= NULL,
 		.enable	= enable_lvds,
 		.mode	= {
@@ -378,46 +372,49 @@ size_t display_count = ARRAY_SIZE(displays);
 
 static void setup_display(void)
 {
-	struct mxc_ccm_reg *mxc_ccm = (struct mxc_ccm_reg *)CCM_BASE_ADDR;
-	struct iomuxc *iomux = (struct iomuxc *)IOMUXC_BASE_ADDR;
+	struct mxc_ccm_reg *mxc_ccm = (struct mxc_ccm_reg *) CCM_BASE_ADDR;
+	struct iomuxc *iomux = (struct iomuxc *) IOMUXC_BASE_ADDR;
+
 	int reg;
 
-	enable_ipu_clock();
-
-	/* Turn on LDB0, LDB1, IPU,IPU DI0 clocks */
-	reg = readl(&mxc_ccm->CCGR3);
-	reg |=  MXC_CCM_CCGR3_LDB_DI0_MASK | MXC_CCM_CCGR3_LDB_DI1_MASK;
+	/* Turn on LDB0,IPU,IPU DI0 clocks */
+	reg = __raw_readl(&mxc_ccm->CCGR3);
+	reg |= MXC_CCM_CCGR3_IPU1_IPU_DI0_OFFSET | MXC_CCM_CCGR3_LDB_DI0_MASK;
 	writel(reg, &mxc_ccm->CCGR3);
 
 	/* set LDB0, LDB1 clk select to 011/011 */
 	reg = readl(&mxc_ccm->cs2cdr);
 	reg &= ~(MXC_CCM_CS2CDR_LDB_DI0_CLK_SEL_MASK | MXC_CCM_CS2CDR_LDB_DI1_CLK_SEL_MASK);
-	reg |= (3 << MXC_CCM_CS2CDR_LDB_DI0_CLK_SEL_OFFSET) | (3 << MXC_CCM_CS2CDR_LDB_DI1_CLK_SEL_OFFSET);
+	reg |= (3 << MXC_CCM_CS2CDR_LDB_DI0_CLK_SEL_OFFSET)	| (3 << MXC_CCM_CS2CDR_LDB_DI1_CLK_SEL_OFFSET);
 	writel(reg, &mxc_ccm->cs2cdr);
 
 	reg = readl(&mxc_ccm->cscmr2);
-	reg |= MXC_CCM_CSCMR2_LDB_DI0_IPU_DIV | MXC_CCM_CSCMR2_LDB_DI1_IPU_DIV;
+	reg |= MXC_CCM_CSCMR2_LDB_DI0_IPU_DIV;
 	writel(reg, &mxc_ccm->cscmr2);
 
 	reg = readl(&mxc_ccm->chsccdr);
-	reg |= (CHSCCDR_CLK_SEL_LDB_DI0 << MXC_CCM_CHSCCDR_IPU1_DI0_CLK_SEL_OFFSET);
-	reg |= (CHSCCDR_CLK_SEL_LDB_DI0	<< MXC_CCM_CHSCCDR_IPU1_DI1_CLK_SEL_OFFSET);
+	reg &= ~(MXC_CCM_CHSCCDR_IPU1_DI0_PRE_CLK_SEL_MASK
+		   | MXC_CCM_CHSCCDR_IPU1_DI0_PODF_MASK
+		   | MXC_CCM_CHSCCDR_IPU1_DI0_CLK_SEL_MASK);
+	reg |=(CHSCCDR_CLK_SEL_LDB_DI0 << MXC_CCM_CHSCCDR_IPU1_DI0_CLK_SEL_OFFSET)
+		| (CHSCCDR_PODF_DIVIDE_BY_3 << MXC_CCM_CHSCCDR_IPU1_DI0_PODF_OFFSET)
+		| (CHSCCDR_IPU_PRE_CLK_540M_PFD
+					<< MXC_CCM_CHSCCDR_IPU1_DI0_PRE_CLK_SEL_OFFSET);
 	writel(reg, &mxc_ccm->chsccdr);
 
 	reg = IOMUXC_GPR2_BGREF_RRMODE_EXTERNAL_RES
-	     | IOMUXC_GPR2_DI1_VS_POLARITY_ACTIVE_LOW
-	     | IOMUXC_GPR2_DI0_VS_POLARITY_ACTIVE_LOW
-	     | IOMUXC_GPR2_BIT_MAPPING_CH1_SPWG
-	     | IOMUXC_GPR2_DATA_WIDTH_CH1_18BIT
-	     | IOMUXC_GPR2_BIT_MAPPING_CH0_SPWG
-	     | IOMUXC_GPR2_DATA_WIDTH_CH0_18BIT
-	     | IOMUXC_GPR2_LVDS_CH0_MODE_DISABLED
-	     | IOMUXC_GPR2_LVDS_CH1_MODE_ENABLED_DI0;
+			| IOMUXC_GPR2_DI1_VS_POLARITY_ACTIVE_HIGH
+			| IOMUXC_GPR2_DI0_VS_POLARITY_ACTIVE_LOW
+			| IOMUXC_GPR2_BIT_MAPPING_CH1_SPWG
+			| IOMUXC_GPR2_DATA_WIDTH_CH1_18BIT
+			| IOMUXC_GPR2_BIT_MAPPING_CH0_SPWG
+			| IOMUXC_GPR2_DATA_WIDTH_CH0_18BIT
+			| IOMUXC_GPR2_LVDS_CH1_MODE_DISABLED
+			| IOMUXC_GPR2_LVDS_CH0_MODE_ENABLED_DI0;
 	writel(reg, &iomux->gpr[2]);
 
 	reg = readl(&iomux->gpr[3]);
-	reg = (reg & ~(IOMUXC_GPR3_LVDS1_MUX_CTL_MASK | IOMUXC_GPR3_HDMI_MUX_CTL_MASK))
-	    | (IOMUXC_GPR3_MUX_SRC_IPU1_DI0 << IOMUXC_GPR3_LVDS1_MUX_CTL_OFFSET);
+	reg = (reg & ~IOMUXC_GPR3_LVDS0_MUX_CTL_MASK) | (IOMUXC_GPR3_MUX_SRC_IPU1_DI0 << IOMUXC_GPR3_LVDS0_MUX_CTL_OFFSET);
 	writel(reg, &iomux->gpr[3]);
 }
 #endif /* CONFIG_VIDEO_IPUV3 */

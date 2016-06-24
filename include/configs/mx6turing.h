@@ -118,6 +118,8 @@
 #define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"image=zImage\0" 																								\
+	"splashpos=m,m\0"																								\
+	"panel=atm0700l6bt\0"																							\
 	"fdtfile=undefined\0" 																							\
 	"fdt_addr_r=0x18000000\0" 																						\
 	"boot_fdt=try\0" 																								\
@@ -250,7 +252,7 @@
 
 /* Framebuffer */
 #define CONFIG_VIDEO
-#define CFG_CMD_BMP
+#define CONFIG_CMD_BMP
 #define CONFIG_VIDEO_IPUV3
 #define CONFIG_CFB_CONSOLE
 #define CONFIG_VGA_AS_SINGLE_DEVICE
@@ -260,8 +262,6 @@
 #define CONFIG_SPLASH_SCREEN
 #define CONFIG_SPLASH_SCREEN_ALIGN
 #define CONFIG_BMP_16BPP
-#define CONFIG_VIDEO_LOGO
-#define CONFIG_VIDEO_BMP_LOGO
 #define CONFIG_IPUV3_CLK 260000000
 #define CONFIG_IMX_VIDEO_SKIP
 
