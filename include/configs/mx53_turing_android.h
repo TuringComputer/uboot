@@ -153,15 +153,15 @@
 		"nfsroot=/opt/eldk/arm\0"					\
 		"bootargs_base=setenv bootargs console=ttymxc4,115200 no_console_suspend \0"																		\
 		"hdmi_XGA=setenv bootargs ${bootargs} di1_primary video=mxcdi1fb:RGB24,1024x768M@60 hdmi\0"	\
-		"hdmi_720p=setenv bootargs ${bootargs} di1_primary video=mxcdi1fb:RGB24,1280x720M@60 hdmi\0"	\
+		"hdmi_720p=setenv bootargs ${bootargs} di1_primary video=mxcdi1fb:RGB24,720P60 hdmi\0"	\
 		"hdmi_1080p=setenv bootargs ${bootargs} di1_primary video=mxcdi1fb:RGB24,1080P60 hdmi\0"	\
-		"lvds=setenv bootargs ${bootargs} di0_primary video=mxcdi0fb:RGB565,CLAA-WVGA ldb=di0 calibration\0" \
-		"dual_display=setenv bootargs ${bootargs} di0_primary video=mxcdi0fb:RGB565,CLAA-WVGA ldb=di0 calibration video=mxcdi1fb:RGB24,1024x768M@60 hdmi\0" \
-		"set_display=run hdmi_XGA\0"																								\
+		"lvds=setenv bootargs ${bootargs} di0_primary video=mxcdi0fb:RGB666,ATM0700L6BT calibration ldb=single,di=0,ch0_map=SPWG,ch1_map=SPWG\0" \
+		"dual_display=setenv bootargs ${bootargs} video=mxcdi1fb:RGB24,1024x768M@60 di0_primary video=mxcdi0fb:RGB666,ATM0700L6BT calibration ldb=single,di=0,ch0_map=SPWG,ch1_map=SPWG\0" \
+		"set_display=run dual_display\0"																								\
 		"bootargs_android=setenv bootargs ${bootargs} init=/init androidboot.console=ttymxc4 \0"		\
 		"bootcmd=run bootcmd_SD\0"														\
 		"bootcmd_SD=run bootcmd_SD1 bootcmd_SD2\0"										\
-		"bootcmd_SD1=run bootargs_base set_display bootargs_android\0"					\
+		"bootcmd_SD1=run bootargs_base set_display bootargs_android\0"		\
 		"bootcmd_SD2=mmc read 0 ${loadaddr} 0x800 0x2000;"								\
 		"mmc read 0 ${rd_loadaddr} 0x3000 0x300;bootm ${loadaddr} ${rd_loadaddr}\0" 	\
 		"bootargs_nfs=setenv bootargs ${bootargs} root=/dev/nfs "						\
