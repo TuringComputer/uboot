@@ -54,7 +54,7 @@ DECLARE_GLOBAL_DATA_PTR;
 						PAD_CTL_SRE_FAST    | PAD_CTL_HYS)
 
 #define USDHC_PAD_CTRL (PAD_CTL_PUS_47K_UP |						\
-						PAD_CTL_SPEED_LOW  | PAD_CTL_DSE_80ohm |	\
+						PAD_CTL_SPEED_LOW | PAD_CTL_DSE_80ohm |	\
 						PAD_CTL_SRE_FAST   | PAD_CTL_HYS)
 
 #define I2C_PAD_CTRL   (PAD_CTL_PUS_100K_UP |									\
@@ -63,11 +63,9 @@ DECLARE_GLOBAL_DATA_PTR;
 
 #define I2C_PMIC	1
 
-#define GPIO_LED1				IMX_GPIO_NR(2, 3)
-#define GPIO_LED2				IMX_GPIO_NR(2, 4)
-#define GPIO_LED3				IMX_GPIO_NR(2, 5)
-#define GPIO_LED4				IMX_GPIO_NR(6, 7)
-#define GPIO_LED5				IMX_GPIO_NR(2, 2)
+#define DISP0_PWR_EN			IMX_GPIO_NR(1, 22)
+#define USB_HUB_RSTn			IMX_GPIO_NR(3, 20)
+#define USB_OTG_PWR_EN			IMX_GPIO_NR(3, 22)
 
 int dram_init(void)
 {
