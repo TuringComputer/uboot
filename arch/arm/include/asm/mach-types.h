@@ -5007,7 +5007,7 @@
 #define MACH_TYPE_BCU1                 5062
 #define MACH_TYPE_DIYEFIS6410          5063
 #define MACH_TYPE_MX53_TURING          5064
-#define MACH_TYPE_MX6X_TURING          5065
+#define MACH_TYPE_MX6Q_TURING          5065
 #define MACH_TYPE_MX6DL_TURING         5066
 #define MACH_TYPE_MX53_INDASH          5067
 #define MACH_TYPE_MX6Q_INDASH          5068

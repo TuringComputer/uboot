@@ -1,0 +1,6 @@
+MX6XTURING BOARD
+M:	Mauricio Cirelli <mauricio@turingcomputer.com.br>
+S:	Maintained
+F:	board/turing/imx6x/
+F:	include/configs/mx6turing.h
+F:	configs/mx6turing_defconfig

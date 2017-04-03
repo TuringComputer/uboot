@@ -632,6 +632,12 @@ config TARGET_MX53SMD
 	select CPU_V7
 	select BOARD_EARLY_INIT_F
 
+config TARGET_MX53TURING
+        bool "Support Turing i.MX53 Boards"
+        select BOARD_LATE_INIT
+        select CPU_V7
+        select BOARD_EARLY_INIT_F
+
 config OMAP34XX
 	bool "OMAP34XX SoC"
 	select ARCH_OMAP2
@@ -1228,6 +1234,7 @@ source "board/freescale/mx53ard/Kconfig"
 source "board/freescale/mx53evk/Kconfig"
 source "board/freescale/mx53loco/Kconfig"
 source "board/freescale/mx53smd/Kconfig"
+source "board/turing/mx53turing/Kconfig"
 source "board/freescale/s32v234evb/Kconfig"
 source "board/freescale/vf610twr/Kconfig"
 source "board/grinn/chiliboard/Kconfig"

@@ -1,0 +1,15 @@
+if TARGET_MX53TURING
+
+config SYS_BOARD
+	default "mx53turing"
+
+config SYS_VENDOR
+	default "turing"
+
+config SYS_SOC
+	default "mx5"
+
+config SYS_CONFIG_NAME
+	default "mx53turing"
+
+endif
