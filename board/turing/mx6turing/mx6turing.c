@@ -53,9 +53,6 @@ DECLARE_GLOBAL_DATA_PTR;
 					    PAD_CTL_SPEED_MED   | PAD_CTL_DSE_40ohm | PAD_CTL_HYS |	\
 					    PAD_CTL_ODE 	    | PAD_CTL_SRE_FAST)
 
-#define SPI_PAD_CTRL (PAD_CTL_HYS | PAD_CTL_SPEED_MED | \
-		      PAD_CTL_DSE_40ohm | PAD_CTL_SRE_FAST)
-
 #define OTG_ID_PAD_CTRL (PAD_CTL_PKE | PAD_CTL_PUE |		\
 	PAD_CTL_PUS_47K_UP  | PAD_CTL_SPEED_LOW |				\
 	PAD_CTL_DSE_80ohm   | PAD_CTL_SRE_FAST  | PAD_CTL_HYS)
@@ -112,18 +109,6 @@ static iomux_v3_cfg_t const i2c2_pads[] = {
 	IOMUX_PADS(PAD_KEY_ROW3__I2C2_SDA  | MUX_PAD_CTRL(I2C_PAD_CTRL)),
 };
 
-static iomux_v3_cfg_t const ecspi1_pads[] = {
-	IOMUX_PADS(PAD_EIM_D17__ECSPI1_MISO) | MUX_PAD_CTRL(SPI_PAD_CTRL),
-	IOMUX_PADS(PAD_EIM_D18__ECSPI1_MOSI) | MUX_PAD_CTRL(SPI_PAD_CTRL),
-	IOMUX_PADS(PAD_EIM_D16__ECSPI1_SCLK) | MUX_PAD_CTRL(SPI_PAD_CTRL),
-};
-
-static iomux_v3_cfg_t const ecspi2_pads[] = {
-	IOMUX_PADS(PAD_EIM_OE__ECSPI2_MISO) | MUX_PAD_CTRL(SPI_PAD_CTRL),
-	IOMUX_PADS(PAD_EIM_CS1__ECSPI2_MOSI) | MUX_PAD_CTRL(SPI_PAD_CTRL),
-	IOMUX_PADS(PAD_EIM_CS0__ECSPI2_SCLK) | MUX_PAD_CTRL(SPI_PAD_CTRL),
-};
-
 static iomux_v3_cfg_t const gpio_pads[] = {
 	IOMUX_PADS(PAD_ENET_MDIO__GPIO1_IO22  | MUX_PAD_CTRL(NO_PAD_CTRL)),
 	IOMUX_PADS(PAD_EIM_D20__GPIO3_IO20  | MUX_PAD_CTRL(NO_PAD_CTRL)),
@@ -154,17 +139,6 @@ static struct i2c_pads_info i2cdl_pad_info = {
 		.gp = IMX_GPIO_NR(4, 13)
 	}
 };
-
-static void setup_spi(void)
-{
-	imx_iomux_v3_setup_multiple_pads(ecspi1_pads, ARRAY_SIZE(ecspi1_pads));
-	imx_iomux_v3_setup_multiple_pads(ecspi2_pads, ARRAY_SIZE(ecspi2_pads));
-}
-
-static void setup_pcie(void)
-{
-	// Setup POWER AND RESET GPIOs for PCI-e
-}
 
 #ifdef CONFIG_USB_EHCI_MX6
 
@@ -458,8 +432,19 @@ int board_early_init_f(void)
 	int ret = 0;
 	SETUP_IOMUX_PADS(gpio_pads);
 	setup_iomux_uart();
+    if (is_cpu_type(MXC_CPU_MX6Q) || is_cpu_type(MXC_CPU_MX6D))
+	{
+		setup_i2c(1, CONFIG_SYS_I2C_SPEED, 0x7f, &i2cq_pad_info);
+	}
+	else
+	{
+		setup_i2c(1, CONFIG_SYS_I2C_SPEED, 0x7f, &i2cdl_pad_info);
+	}
 #ifdef CONFIG_VIDEO_IPUV3
 	setup_display();
+#endif
+#ifdef CONFIG_USB_EHCI_MX6
+	setup_usb();
 #endif
 	return ret;
 }
@@ -518,23 +503,6 @@ int board_init(void)
 	/* address of boot parameters */
 	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
 
-	if (is_cpu_type(MXC_CPU_MX6Q) || is_cpu_type(MXC_CPU_MX6D))
-	{
-		setup_i2c(1, CONFIG_SYS_I2C_SPEED, 0x7f, &i2cq_pad_info);
-	}
-	else
-	{
-		setup_i2c(1, CONFIG_SYS_I2C_SPEED, 0x7f, &i2cdl_pad_info);
-	}
-
-	setup_pcie();
-#ifdef CONFIG_MXC_SPI
-	setup_spi();
-#endif
-#ifdef CONFIG_USB_EHCI_MX6
-	setup_usb();
-#endif
-
 	return 0;
 }
 
@@ -543,15 +511,6 @@ int checkboard(void)
 	puts("Board: MX6-Turing\n");
 	return 0;
 }
-
-#ifdef CONFIG_MXC_SPI
-int board_spi_cs_gpio(unsigned bus, unsigned cs)
-{
-	// If using any SPI device, return the GPIO for CS
-	//return (bus == 0 && cs == 0) ? (IMX_GPIO_NR(4, 9)) : -1;
-	return -1;
-}
-#endif
 
 int board_late_init(void)
 {
@@ -567,7 +526,6 @@ int board_late_init(void)
 
 	/* Kernel Memory Allocation */
 #ifndef TURING_SMART_VARIANT
-        #warning ("TURING MX6 BOARD\r\n");
 	if (is_cpu_type(MXC_CPU_MX6Q)) {
 		setenv("bootargs_mem", "cma=320M");
 	}
@@ -581,7 +539,6 @@ int board_late_init(void)
 		setenv("bootargs_mem", "cma=256M");
 	}
 #else
-        #warning ("TURING MX6 SMART BOARD\r\n");
 	if (is_cpu_type(MXC_CPU_MX6Q)) {
 		setenv("bootargs_mem", "cma=320M");
 	}
@@ -598,6 +555,13 @@ int board_late_init(void)
 
 	return 0;
 }
+
+#ifdef CONFIG_SPL_OS_BOOT
+int spl_start_uboot(void)
+{
+    return 1;
+}
+#endif
 
 #ifdef CONFIG_SPL_BUILD
 #include <asm/arch/mx6-ddr.h>
