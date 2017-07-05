@@ -115,12 +115,12 @@
 	"fdt_addr_r=0x18000000\0" 																						\
 	"boot_fdt=try\0" 																								\
 	"ip_dyn=yes\0" 																									\
-	"console=" CONSOLE_DEV "\0" 																				\
+	"console=" CONSOLE_DEV "\0" 																				    \
 	"bootm_size=0x10000000\0" 																						\
-	"mmcdev=" __stringify(SYS_MMC_ENV_DEV1) "\0"																\
+	"mmcdev=" __stringify(SYS_MMC_ENV_DEV1) "\0"																    \
 	"mmcpart=1\0" 																									\
-	"mmcroot=" MMCROOT1 " rootwait rw\0" 																	\
-	"mmcargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} root=${mmcroot} fbcon=map:<02>\0" 	\
+	"mmcroot=" MMCROOT1 " rootwait rw\0" 																	        \
+	"mmcargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} $board_rev root=${mmcroot} fbcon=map:<02>\0" 	\
 	"loadbootscript=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0" 										\
 	"bootscript=echo Running bootscript from mmc ...; source\0" 													\
 	"loadimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${image}\0" 											\
@@ -140,7 +140,7 @@
 		"else " 																									\
 			"bootz; " 																								\
 		"fi;\0" 																									\
-	"netargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} root=/dev/nfs ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp fbcon=map:<02>\0" \
+	"netargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} $board_rev root=/dev/nfs ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp fbcon=map:<02>\0" \
 	"netboot=echo Booting from net ...; " 																			\
 		"usb start;"																								\
 		"run netargs; " 																							\
@@ -178,8 +178,8 @@
 		"if run loadimage; then " 																					\
 			"run mmcboot; " 																						\
 		"else "																										\
-			"setenv mmcdev " __stringify(SYS_MMC_ENV_DEV2) "; "												\
-			"setenv mmcroot " __stringify(MMCROOT2) "; "														\
+			"setenv mmcdev " __stringify(SYS_MMC_ENV_DEV2) "; "												        \
+			"setenv mmcroot " __stringify(MMCROOT2) "; "														    \
 			"mmc dev ${mmcdev}; " 																					\
 			"if mmc rescan; then " 																					\
 					"if run loadimage; then "																		\
@@ -192,8 +192,8 @@
 			"fi; "																									\
 		"fi; "																										\
 	"else "																											\
-		"setenv mmcdev " __stringify(SYS_MMC_ENV_DEV2) "; "													\
-		"setenv mmcroot " __stringify(MMCROOT2) "; "															\
+		"setenv mmcdev " __stringify(SYS_MMC_ENV_DEV2) "; "													        \
+		"setenv mmcroot " __stringify(MMCROOT2) "; "															    \
 		"mmc dev ${mmcdev}; " 																						\
 		"if mmc rescan; then " 																						\
 			"if run loadimage; then "																				\

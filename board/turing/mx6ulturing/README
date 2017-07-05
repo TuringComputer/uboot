@@ -1,15 +1,10 @@
-How to use U-boot on Turing's i.MX6 Boards
+How to use U-boot on Turing's i.MX6 UL/ULL Boards
 -----------------------------------------------------------
 
-- Build U-boot for Turing's i.MX6 Boards:
+- Build U-boot for Turing's i.MX6 UL/ULL Boards:
 
 $ make mrproper
-$ make mx6turing_defconfig
-$ make
-
-- Build U-boot  for SMART variants (i.MX6Q 1GB and i.MX6DL 512MB):
-$ make mrproper
-$ make mx6turing_smart_defconfig
+$ make mx6ulturing_defconfig
 $ make
 
 This will generate the SPL image called SPL and the u-boot.img.
