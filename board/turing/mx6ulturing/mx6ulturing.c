@@ -264,6 +264,17 @@ static struct mx6ul_iomux_grp_regs mx6ul_grp_ioregs = {
 	.grp_ddr_type       = 0x000c0000,
 };
 
+static struct mx6ul_iomux_grp_regs mx6ull_grp_ioregs = {
+    .grp_addds          = 0x00000030,
+    .grp_ddrmode_ctl    = 0x00020000,
+    .grp_b0ds           = 0x00000030,
+    .grp_ctlds          = 0x00000030,
+    .grp_b1ds           = 0x00000030,
+    .grp_ddrpke         = 0x00000000,
+    .grp_ddrmode        = 0x00020000,
+    .grp_ddr_type       = 0x000C0000,
+};
+
 static struct mx6ul_iomux_ddr_regs mx6ul_ddr_ioregs = {
     .dram_dqm0          = 0x00000030,
     .dram_dqm1          = 0x00000030,
@@ -278,11 +289,32 @@ static struct mx6ul_iomux_ddr_regs mx6ul_ddr_ioregs = {
     .dram_reset         = 0x00000030,
 };
 
+static struct mx6ul_iomux_ddr_regs mx6ull_ddr_ioregs = {
+    .dram_dqm0          = 0x00000030,
+    .dram_dqm1          = 0x00000030,
+    .dram_ras           = 0x00000030,
+    .dram_cas           = 0x00000030,
+    .dram_odt0          = 0x00000030,
+    .dram_odt1          = 0x00000030,
+    .dram_sdba2         = 0x00000000,
+    .dram_sdclk_0       = 0x00000030,
+    .dram_sdqs0         = 0x00000030,
+    .dram_sdqs1         = 0x00000030,
+    .dram_reset         = 0x000C0030,
+};
+
 static struct mx6_mmdc_calibration mx6ul_mmcd_calib = {
     .p0_mpwldectrl0     = 0x00070007,
     .p0_mpdgctrl0       = 0x41490145,
     .p0_mprddlctl       = 0x40404546,
     .p0_mpwrdlctl       = 0x4040524D,
+};
+
+static struct mx6_mmdc_calibration mx6ull_mmcd_calib = {
+    .p0_mpwldectrl0     = 0x00000004,
+    .p0_mpdgctrl0       = 0x41640158,
+    .p0_mprddlctl       = 0x40403237,
+    .p0_mpwrdlctl       = 0x40403C33,
 };
 
 struct mx6_ddr_sysinfo ddr_sysinfo = {
@@ -332,8 +364,16 @@ static void ccgr_init(void)
 
 static void spl_dram_init(void)
 {
-    mx6ul_dram_iocfg(mem_ddr.width, &mx6ul_ddr_ioregs, &mx6ul_grp_ioregs);
-    mx6_dram_cfg(&ddr_sysinfo, &mx6ul_mmcd_calib, &mem_ddr);
+    if (is_cpu_type(MXC_CPU_MX6UL))
+    {
+        mx6ul_dram_iocfg(mem_ddr.width, &mx6ul_ddr_ioregs, &mx6ul_grp_ioregs);
+        mx6_dram_cfg(&ddr_sysinfo, &mx6ul_mmcd_calib, &mem_ddr);
+    }
+    else
+    {
+        mx6ul_dram_iocfg(mem_ddr.width, &mx6ull_ddr_ioregs, &mx6ull_grp_ioregs);
+        mx6_dram_cfg(&ddr_sysinfo, &mx6ull_mmcd_calib, &mem_ddr);
+    }
 }
 
 void board_init_f(ulong dummy)

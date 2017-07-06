@@ -93,12 +93,12 @@
     "loadbootscript=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0"                                      \
     "bootscript=echo Running bootscript from mmc ...; source\0"                                                     \
     "loadimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${image}\0"                                             \
-    "loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr_r} ${fdtfile}\0"                                           \
+    "loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdtfile}\0"                                            \
     "mmcboot=echo Booting from mmc ...; "                                                                           \
         "run mmcargs; "                                                                                             \
         "if test ${boot_fdt} = yes || test ${boot_fdt} = try; then "                                                \
             "if run loadfdt; then "                                                                                 \
-                "bootz ${loadaddr} - ${fdt_addr_r}; "                                                               \
+                "bootz ${loadaddr} - ${fdt_addr}; "                                                               \
             "else "                                                                                                 \
                 "if test ${boot_fdt} = try; then "                                                                  \
                     "bootz; "                                                                                       \
@@ -121,8 +121,8 @@
         "fi; "                                                                                                      \
         "${get_cmd} ${image}; "                                                                                     \
         "if test ${boot_fdt} = yes || test ${boot_fdt} = try; then "                                                \
-            "if ${get_cmd} ${fdt_addr_r} ${fdtfile}; then "                                                         \
-                "bootz ${loadaddr} - ${fdt_addr_r}; "                                                               \
+            "if ${get_cmd} ${fdt_addr} ${fdtfile}; then "                                                         \
+                "bootz ${loadaddr} - ${fdt_addr}; "                                                               \
             "else "                                                                                                 \
                 "if test ${boot_fdt} = try; then "                                                                  \
                     "bootz; "                                                                                       \
@@ -147,7 +147,6 @@
         "bootz ${loadaddr} - ${fdt_addr}\0"                                                                         \
 
 #define CONFIG_BOOTCOMMAND                                                                                          \
-       "mmc dev ${mmcdev};"                                                                                         \
        "mmc dev ${mmcdev};"                                                                                         \
        "if mmc rescan; then "                                                                                       \
            "if run loadimage; then "                                                                                \
