@@ -514,44 +514,40 @@ int checkboard(void)
 
 int board_late_init(void)
 {
-	// Defines the processor family, to load the correct device tree binaries
-	if (is_cpu_type(MXC_CPU_MX6Q) || is_cpu_type(MXC_CPU_MX6D))
+	/* Defines the processor family, to load the correct device tree binaries */
+	if(is_cpu_type(MXC_CPU_MX6Q))
 	{
-		setenv("board_rev", "MX6Q");
+	    setenv("board_rev", "MX6Q");
+	    setenv("fdtfile", "imx6q-turing-eval.dtb");
+	    setenv("bootargs_mem", "cma=320M");
+	}
+	else if(is_cpu_type(MXC_CPU_MX6D))
+	{
+	    setenv("board_rev", "MX6D");
+	    setenv("fdtfile", "imx6q-turing-eval.dtb");
+	    setenv("bootargs_mem", "cma=320M");
+	}
+	else  if(is_cpu_type(MXC_CPU_MX6DL))
+	{
+	    setenv("board_rev", "MX6DL");
+	    setenv("fdtfile", "imx6dl-turing-eval.dtb");
+#ifndef TURING_SMART_VARIANT
+        setenv("bootargs_mem", "cma=320M");
+#else
+        setenv("bootargs_mem", "cma=256M");
+#endif
+	}
+	else if (is_cpu_type(MXC_CPU_MX6SOLO))
+	{
+	    setenv("board_rev", "MX6S");
+	    setenv("fdtfile", "imx6dl-turing-eval.dtb");
+	    setenv("bootargs_mem", "cma=256M");
 	}
 	else
 	{
-		setenv("board_rev", "MX6DL");
+	    printf("Wrong SOC family!\n");
+	    return -1;
 	}
-
-	/* Kernel Memory Allocation */
-#ifndef TURING_SMART_VARIANT
-	if (is_cpu_type(MXC_CPU_MX6Q)) {
-		setenv("bootargs_mem", "cma=320M");
-	}
-	else if (is_cpu_type(MXC_CPU_MX6D)) {
-		setenv("bootargs_mem", "cma=320M");
-	}
-	else if (is_cpu_type(MXC_CPU_MX6DL)) {
-		setenv("bootargs_mem", "cma=320M");
-	}
-	else if (is_cpu_type(MXC_CPU_MX6SOLO)) {
-		setenv("bootargs_mem", "cma=256M");
-	}
-#else
-	if (is_cpu_type(MXC_CPU_MX6Q)) {
-		setenv("bootargs_mem", "cma=320M");
-	}
-	else if (is_cpu_type(MXC_CPU_MX6D)) {
-		setenv("bootargs_mem", "cma=320M");
-	}
-	else if (is_cpu_type(MXC_CPU_MX6DL)) {
-		setenv("bootargs_mem", "cma=256M");
-	}
-	else if (is_cpu_type(MXC_CPU_MX6SOLO)) {
-		setenv("bootargs_mem", "cma=256M");
-	}
-#endif
 
 	return 0;
 }

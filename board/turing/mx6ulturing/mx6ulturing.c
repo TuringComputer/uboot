@@ -26,11 +26,11 @@ DECLARE_GLOBAL_DATA_PTR;
 
 #define UART_PAD_CTRL  (PAD_CTL_PKE | PAD_CTL_PUE |		                    \
 	PAD_CTL_PUS_100K_UP | PAD_CTL_SPEED_MED |		                        \
-	PAD_CTL_DSE_40ohm   | PAD_CTL_SRE_FAST  | PAD_CTL_HYS)
+	PAD_CTL_DSE_48ohm   | PAD_CTL_SRE_FAST  | PAD_CTL_HYS)
 
 #define USDHC_PAD_CTRL (PAD_CTL_PKE | PAD_CTL_PUE |		                    \
 	PAD_CTL_PUS_22K_UP  | PAD_CTL_SPEED_LOW |		                        \
-	PAD_CTL_DSE_80ohm   | PAD_CTL_SRE_FAST  | PAD_CTL_HYS)
+	PAD_CTL_DSE_48ohm   | PAD_CTL_SRE_FAST  | PAD_CTL_HYS)
 
 #define GPMI_PAD_CTRL0 (PAD_CTL_PKE | PAD_CTL_PUE | PAD_CTL_PUS_100K_UP)
 #define GPMI_PAD_CTRL1 (PAD_CTL_DSE_40ohm | PAD_CTL_SPEED_MED | PAD_CTL_SRE_FAST)
@@ -264,32 +264,7 @@ static struct mx6ul_iomux_grp_regs mx6ul_grp_ioregs = {
 	.grp_ddr_type       = 0x000c0000,
 };
 
-static struct mx6ul_iomux_grp_regs mx6ull_grp_ioregs = {
-    .grp_addds          = 0x00000030,
-    .grp_ddrmode_ctl    = 0x00020000,
-    .grp_b0ds           = 0x00000030,
-    .grp_ctlds          = 0x00000030,
-    .grp_b1ds           = 0x00000030,
-    .grp_ddrpke         = 0x00000000,
-    .grp_ddrmode        = 0x00020000,
-    .grp_ddr_type       = 0x000C0000,
-};
-
 static struct mx6ul_iomux_ddr_regs mx6ul_ddr_ioregs = {
-    .dram_dqm0          = 0x00000030,
-    .dram_dqm1          = 0x00000030,
-    .dram_ras           = 0x00000030,
-    .dram_cas           = 0x00000030,
-    .dram_odt0          = 0x00000030,
-    .dram_odt1          = 0x00000030,
-    .dram_sdba2         = 0x00000000,
-    .dram_sdclk_0       = 0x00000008,
-    .dram_sdqs0         = 0x00000038,
-    .dram_sdqs1         = 0x00000030,
-    .dram_reset         = 0x00000030,
-};
-
-static struct mx6ul_iomux_ddr_regs mx6ull_ddr_ioregs = {
     .dram_dqm0          = 0x00000030,
     .dram_dqm1          = 0x00000030,
     .dram_ras           = 0x00000030,
@@ -300,21 +275,25 @@ static struct mx6ul_iomux_ddr_regs mx6ull_ddr_ioregs = {
     .dram_sdclk_0       = 0x00000030,
     .dram_sdqs0         = 0x00000030,
     .dram_sdqs1         = 0x00000030,
-    .dram_reset         = 0x000C0030,
+    .dram_reset         = 0x00000030,
 };
 
 static struct mx6_mmdc_calibration mx6ul_mmcd_calib = {
-    .p0_mpwldectrl0     = 0x00070007,
-    .p0_mpdgctrl0       = 0x41490145,
-    .p0_mprddlctl       = 0x40404546,
-    .p0_mpwrdlctl       = 0x4040524D,
+    .p0_mpwldectrl0     = 0x00000000,
+    .p0_mpwldectrl1     = 0x00000000,
+    .p0_mpdgctrl0       = 0x4164015C,
+    .p0_mpdgctrl1       = 0x00000000,
+    .p0_mprddlctl       = 0x40404042,
+    .p0_mpwrdlctl       = 0x40405652,
 };
 
 static struct mx6_mmdc_calibration mx6ull_mmcd_calib = {
-    .p0_mpwldectrl0     = 0x00000004,
-    .p0_mpdgctrl0       = 0x41640158,
-    .p0_mprddlctl       = 0x40403237,
-    .p0_mpwrdlctl       = 0x40403C33,
+    .p0_mpwldectrl0     = 0x00010007,
+    .p0_mpwldectrl1     = 0x00080008,
+    .p0_mpdgctrl0       = 0x414C0148,
+    .p0_mpdgctrl1       = 0x00000000,
+    .p0_mprddlctl       = 0x40402E30,
+    .p0_mpwrdlctl       = 0x4040342E,
 };
 
 struct mx6_ddr_sysinfo ddr_sysinfo = {
@@ -324,16 +303,17 @@ struct mx6_ddr_sysinfo ddr_sysinfo = {
     .cs1_mirror = 0,
     .rtt_wr = 2,
     .rtt_nom = 1,       /* RTT_Nom = RZQ/2 */
-    .walat = 1,         /* Write additional latency */
+    .walat = 0,         /* Write additional latency */
     .ralat = 5,         /* Read additional latency */
     .mif3_mode = 3,     /* Command prediction working mode */
     .bi_on = 1,         /* Bank interleaving enabled */
     .sde_to_rst = 0x10, /* 14 cycles, 200us (JEDEC default) */
     .rst_to_cke = 0x23, /* 33 cycles, 500us (JEDEC default) */
     .ddr_type = DDR_TYPE_DDR3,
+    .refr = 1,          /* 2 refresh commands per refresh cycle */
 };
 
-/* MT41K256M16HA-125:E */
+/* MT41K256M16HA-107:P */
 static struct mx6_ddr3_cfg mem_ddr = {
     .mem_speed = 800,
     .density   = 4,
@@ -342,10 +322,9 @@ static struct mx6_ddr3_cfg mem_ddr = {
     .rowaddr   = 15,
     .coladdr   = 10,
     .pagesz    = 2,
-    .trcd      = 1375,
-    .trcmin    = 4875,
-    .trasmin   = 3500,
-    .SRT       = 0,
+    .trcd      = 1300,
+    .trcmin    = 4500,
+    .trasmin   = 3200,
 };
 
 static void ccgr_init(void)
@@ -371,7 +350,7 @@ static void spl_dram_init(void)
     }
     else
     {
-        mx6ul_dram_iocfg(mem_ddr.width, &mx6ull_ddr_ioregs, &mx6ull_grp_ioregs);
+        mx6ul_dram_iocfg(mem_ddr.width, &mx6ul_ddr_ioregs, &mx6ul_grp_ioregs);
         mx6_dram_cfg(&ddr_sysinfo, &mx6ull_mmcd_calib, &mem_ddr);
     }
 }

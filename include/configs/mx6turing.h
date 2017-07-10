@@ -120,7 +120,7 @@
 	"mmcdev=" __stringify(SYS_MMC_ENV_DEV1) "\0"																    \
 	"mmcpart=1\0" 																									\
 	"mmcroot=" MMCROOT1 " rootwait rw\0" 																	        \
-	"mmcargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} $board_rev root=${mmcroot} fbcon=map:<02>\0" 	\
+	"mmcargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} soc=$board_rev root=${mmcroot} fbcon=map:<02>\0" 	\
 	"loadbootscript=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0" 										\
 	"bootscript=echo Running bootscript from mmc ...; source\0" 													\
 	"loadimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${image}\0" 											\
@@ -140,7 +140,7 @@
 		"else " 																									\
 			"bootz; " 																								\
 		"fi;\0" 																									\
-	"netargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} $board_rev root=/dev/nfs ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp fbcon=map:<02>\0" \
+	"netargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} soc=$board_rev root=/dev/nfs ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp fbcon=map:<02>\0" \
 	"netboot=echo Booting from net ...; " 																			\
 		"usb start;"																								\
 		"run netargs; " 																							\
@@ -163,16 +163,9 @@
 		"else " 																									\
 			"bootz; " 																								\
 		"fi;\0" 																									\
-	"findfdt="																										\
-		"if test $board_rev = MX6Q ; then " 																		\
-			"setenv fdtfile imx6q-turing-eval.dtb; fi; " 															\
-		"if test $board_rev = MX6DL ; then " 																		\
-			"setenv fdtfile imx6dl-turing-eval.dtb; fi; " 															\
-		"if test $fdtfile = undefined; then " 																		\
-			"echo WARNING: Could not determine dtb to use; fi; \0" 													\
+
 
 #define CONFIG_BOOTCOMMAND 																							\
-	"run findfdt; " 																								\
 	"mmc dev ${mmcdev}; " 																							\
 	"if mmc rescan; then " 																							\
 		"if run loadimage; then " 																					\

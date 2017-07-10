@@ -88,17 +88,17 @@
     "mmcroot=" MMCROOT1 " rootwait rw\0"                                                                            \
     "nandroot=ubi0:rootfs rootfstype=ubifs\0"                                                                       \
     "mmcautodetect=yes\0"                                                                                           \
-    "mmcargs=setenv bootargs console=${console},${baudrate} no_console_suspend $board_rev "                         \
+    "mmcargs=setenv bootargs console=${console},${baudrate} no_console_suspend soc=$board_rev "                     \
         "root=${mmcroot}\0"                                                                                         \
     "loadbootscript=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0"                                      \
     "bootscript=echo Running bootscript from mmc ...; source\0"                                                     \
     "loadimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${image}\0"                                             \
-    "loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdtfile}\0"                                            \
+    "loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdtfile}\0"                                             \
     "mmcboot=echo Booting from mmc ...; "                                                                           \
         "run mmcargs; "                                                                                             \
         "if test ${boot_fdt} = yes || test ${boot_fdt} = try; then "                                                \
             "if run loadfdt; then "                                                                                 \
-                "bootz ${loadaddr} - ${fdt_addr}; "                                                               \
+                "bootz ${loadaddr} - ${fdt_addr}; "                                                                 \
             "else "                                                                                                 \
                 "if test ${boot_fdt} = try; then "                                                                  \
                     "bootz; "                                                                                       \
@@ -109,7 +109,7 @@
         "else "                                                                                                     \
             "bootz; "                                                                                               \
         "fi;\0"                                                                                                     \
-    "netargs=setenv bootargs console=${console},${baudrate} no_console_suspend $board_rev "                         \
+    "netargs=setenv bootargs console=${console},${baudrate} no_console_suspend soc=$board_rev "                     \
         "root=/dev/nfs ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp\0"                                             \
     "netboot=echo Booting from net ...; "                                                                           \
         "usb start;"                                                                                                \
@@ -121,8 +121,8 @@
         "fi; "                                                                                                      \
         "${get_cmd} ${image}; "                                                                                     \
         "if test ${boot_fdt} = yes || test ${boot_fdt} = try; then "                                                \
-            "if ${get_cmd} ${fdt_addr} ${fdtfile}; then "                                                         \
-                "bootz ${loadaddr} - ${fdt_addr}; "                                                               \
+            "if ${get_cmd} ${fdt_addr} ${fdtfile}; then "                                                           \
+                "bootz ${loadaddr} - ${fdt_addr}; "                                                                 \
             "else "                                                                                                 \
                 "if test ${boot_fdt} = try; then "                                                                  \
                     "bootz; "                                                                                       \
@@ -133,7 +133,7 @@
         "else "                                                                                                     \
             "bootz; "                                                                                               \
         "fi;\0"                                                                                                     \
-    "nandargs=setenv bootargs console=${console},${baudrate} no_console_suspend $board_rev "                        \
+    "nandargs=setenv bootargs console=${console},${baudrate} no_console_suspend soc=$board_rev "                    \
         "ubi.mtd=5 root=${nandroot} ${mtdparts}\0"                                                                  \
     "nandboot=echo Booting from nand ...; "                                                                         \
         "if mtdparts; then "                                                                                        \
