@@ -180,7 +180,8 @@ static struct fsl_esdhc_cfg usdhc_cfg[1] = {
 
 int board_mmc_getcd(struct mmc *mmc)
 {
-	return !gpio_get_value(USDHC1_CD_GPIO);
+	//return !gpio_get_value(USDHC1_CD_GPIO);
+    return 1;
 }
 
 int board_mmc_init(bd_t *bis)
@@ -218,15 +219,57 @@ int board_init(void)
 
 int board_late_init(void)
 {
+    // Read boot device from registers
+    struct src *psrc = (struct src *)SRC_BASE_ADDR;
+    unsigned int gpr10_boot = readl(&psrc->gpr10) & (1 << 28);
+    unsigned reg = gpr10_boot ? readl(&psrc->gpr9) : readl(&psrc->sbmr1);
+    unsigned int bmode = readl(&psrc->sbmr2);
+
+    /*
+     * Check for BMODE if serial downloader is enabled
+     * BOOT_MODE - see IMX6DQRM Table 8-1
+     */
+    printf("Booting from ");
+    if (((bmode >> 24) & 0x03) == 0x01) /* Serial Downloader */
+    {
+        printf("Serial Downloader (not supported!)");
+        return -1;
+    }
+
+    /* BOOT_CFG1[7:4] - see IMX6DQRM Table 8-8 */
+    switch ((reg & 0x000000FF) >> 4)
+    {
+        /* SD/eSD: 8.5.3, Table 8-15  */
+        case 0x4:
+        case 0x5:
+        /* MMC/eMMC: 8.5.3 */
+        case 0x6:
+        case 0x7:
+            printf("uSD/MMC\n");
+            setenv("boot_dev", "mmc");
+            break;
+        /* NAND Flash: 8.5.2 */
+        case 0x8 ... 0xf:
+            printf("NAND\n");
+            setenv("boot_dev", "nand");
+            break;
+        default:
+            printf("Unknown boot source.\n");
+            setenv("boot_dev", "undefined");
+            break;
+    }
+
     if (is_cpu_type(MXC_CPU_MX6UL))
     {
         setenv("board_rev", "MX6UL");
         setenv("fdtfile", "imx6ul-turing-eval.dtb");
+        setenv("fdtnand", "dtb-ul-0");
     }
     else
     {
         setenv("board_rev", "MX6ULL");
         setenv("fdtfile", "imx6ull-turing-eval.dtb");
+        setenv("fdtnand", "dtb-ull-0");
     }
 
 	return 0;

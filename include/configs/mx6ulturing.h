@@ -15,13 +15,6 @@
 
 /* SPL options */
 #ifdef CONFIG_SPL
-#define CONFIG_SPL_FS_LOAD_ARGS_NAME                    "args"
-#define CONFIG_SPL_FS_LOAD_KERNEL_NAME                  "uImage"
-#define CONFIG_SYS_SPL_ARGS_ADDR                        0x18000000
-#define CONFIG_CMD_SPL_WRITE_SIZE                       (128 * SZ_1K)
-#define CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTOR           0x800   /* 1MB */
-#define CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTORS          (CONFIG_CMD_SPL_WRITE_SIZE / 512)
-#define CONFIG_SYS_MMCSD_RAW_MODE_KERNEL_SECTOR         0x1000  /* 2MB */
 #include "imx6_spl.h"
 #endif
 
@@ -38,6 +31,9 @@
 #define CONFIG_SYS_FSL_USDHC_NUM	    1
 #define MMCROOT1                        "/dev/mmcblk0p2"
 #define CONFIG_MMCROOT                  MMCROOT1
+#define CONFIG_SYS_FSL_ESDHC_ADDR       0
+#define SYS_MMC_ENV_DEV1                0   /* 0: SDHC1 */
+#define CONFIG_SYS_MMC_ENV_DEV          SYS_MMC_ENV_DEV1
 
 /* NAND Configs */
 # define CONFIG_SYS_MAX_NAND_DEVICE     1
@@ -45,15 +41,18 @@
 # define CONFIG_SYS_NAND_5_ADDR_CYCLE
 # define CONFIG_SYS_NAND_ONFI_DETECTION
 # define CONFIG_SYS_NAND_U_BOOT_START   CONFIG_SYS_TEXT_BASE
-# define CONFIG_SYS_NAND_U_BOOT_OFFS    0x200000
+# define CONFIG_SYS_NAND_U_BOOT_OFFS    0xE00000
 
 /* MTD device */
 # define CONFIG_MTD_DEVICE
 # define CONFIG_CMD_MTDPARTS
 # define CONFIG_MTD_PARTITIONS
 # define MTDIDS_DEFAULT                 "nand0=gpmi-nand"
-# define MTDPARTS_DEFAULT               "mtdparts=gpmi-nand:2m(spl),2m(uboot)," \
-                                        "1m(env),8m(kernel),1m(dtb),-(rootfs)"
+# define MTDPARTS_DEFAULT               "mtdparts=gpmi-nand:14m(spl),2m(uboot)," \
+                                        "2m(env),8m(kernel)," \
+                                        "2m(dtb-ul-0),2m(dtb-ull-0)," \
+                                        "2m(dtb-ul-1),2m(dtb-ull-1)," \
+                                        "-(rootfs)"
 
 /* UBI */
 # define CONFIG_CMD_UBIFS
@@ -86,15 +85,15 @@
     "mmcdev=" __stringify(SYS_MMC_ENV_DEV1) "\0"                                                                    \
     "mmcpart=1\0"                                                                                                   \
     "mmcroot=" MMCROOT1 " rootwait rw\0"                                                                            \
-    "nandroot=ubi0:rootfs rootfstype=ubifs\0"                                                                       \
+    "nandroot=ubi0 rootfstype=ubifs rootwait rw\0"                                                                  \
     "mmcautodetect=yes\0"                                                                                           \
-    "mmcargs=setenv bootargs console=${console},${baudrate} no_console_suspend soc=$board_rev "                     \
+    "mmcargs=setenv bootargs console=${console},${baudrate} no_console_suspend soc=$board_rev ${mtdparts} "         \
         "root=${mmcroot}\0"                                                                                         \
     "loadbootscript=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0"                                      \
     "bootscript=echo Running bootscript from mmc ...; source\0"                                                     \
     "loadimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${image}\0"                                             \
     "loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdtfile}\0"                                             \
-    "mmcboot=echo Booting from mmc ...; "                                                                           \
+    "mmcboot=echo Booting from mmc...; "                                                                            \
         "run mmcargs; "                                                                                             \
         "if test ${boot_fdt} = yes || test ${boot_fdt} = try; then "                                                \
             "if run loadfdt; then "                                                                                 \
@@ -109,9 +108,9 @@
         "else "                                                                                                     \
             "bootz; "                                                                                               \
         "fi;\0"                                                                                                     \
-    "netargs=setenv bootargs console=${console},${baudrate} no_console_suspend soc=$board_rev "                     \
+    "netargs=setenv bootargs console=${console},${baudrate} no_console_suspend soc=$board_rev ${mtdparts} "         \
         "root=/dev/nfs ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp\0"                                             \
-    "netboot=echo Booting from net ...; "                                                                           \
+    "netboot=echo Booting from net...; "                                                                            \
         "usb start;"                                                                                                \
         "run netargs; "                                                                                             \
         "if test ${ip_dyn} = yes; then "                                                                            \
@@ -133,27 +132,32 @@
         "else "                                                                                                     \
             "bootz; "                                                                                               \
         "fi;\0"                                                                                                     \
-    "nandargs=setenv bootargs console=${console},${baudrate} no_console_suspend soc=$board_rev "                    \
-        "ubi.mtd=5 root=${nandroot} ${mtdparts}\0"                                                                  \
-    "nandboot=echo Booting from nand ...; "                                                                         \
-        "if mtdparts; then "                                                                                        \
-            "Found mtdparts ...; "                                                                                  \
-        "else "                                                                                                     \
-            "mtdparts default; "                                                                                    \
-        "fi; "                                                                                                      \
+    "nandargs=setenv bootargs console=${console},${baudrate} no_console_suspend soc=$board_rev ${mtdparts} "        \
+        "ubi.mtd=8,8192 root=${nandroot}\0"                                                                         \
+    "nandboot=echo Booting from nand...; "                                                                          \
         "run nandargs; "                                                                                            \
-        "nand read ${loadaddr} 0x4000000 0x800000;"                                                                 \
-        "nand read ${fdt_addr} 0x5000000 0x100000;"                                                                 \
+        "nand read ${loadaddr} kernel 0x800000; "                                                                   \
+        "nand read ${fdt_addr} ${fdtnand} 0x100000; "                                                               \
         "bootz ${loadaddr} - ${fdt_addr}\0"                                                                         \
 
 #define CONFIG_BOOTCOMMAND                                                                                          \
-       "mmc dev ${mmcdev};"                                                                                         \
+       "if mtdparts; then "                                                                                         \
+            "echo Found mtdparts...; "                                                                              \
+        "else "                                                                                                     \
+            "echo Using default mtdparts...; "                                                                      \
+            "mtdparts default; "                                                                                    \
+       "fi; "                                                                                                       \
+       "if test ${boot_dev} = nand; then "                                                                          \
+           "run nandboot; "                                                                                         \
+       "fi; "                                                                                                       \
+       "mmc dev ${mmcdev}; "                                                                                        \
        "if mmc rescan; then "                                                                                       \
-           "if run loadimage; then "                                                                                \
+            "if run loadimage; then "                                                                               \
                "run mmcboot; "                                                                                      \
-           "else"                                                                                                   \
+            "else"                                                                                                  \
+                "Failed to boot from uSD... trying Ethernet...; "                                                   \
                 "run netboot; "                                                                                     \
-           "fi; "                                                                                                   \
+            "fi; "                                                                                                  \
        "fi; "                                                                                                       \
 
 /* Miscellaneous configurable options */
@@ -179,13 +183,20 @@
 #define CONFIG_SYS_INIT_SP_OFFSET   (CONFIG_SYS_INIT_RAM_SIZE - GENERATED_GBL_DATA_SIZE)
 #define CONFIG_SYS_INIT_SP_ADDR     (CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_SP_OFFSET)
 
-/* environment organization */
-#define CONFIG_ENV_SIZE             SZ_128K
-#define CONFIG_ENV_IS_IN_MMC
-#define CONFIG_SYS_FSL_ESDHC_ADDR   0
-#define CONFIG_ENV_OFFSET		    (8 * SZ_64K)
-#define SYS_MMC_ENV_DEV1            0   /* 0: SDHC1; 1:SDHC2 */
-#define CONFIG_SYS_MMC_ENV_DEV      SYS_MMC_ENV_DEV1
+/* Environment */
+#define CONFIG_ENV_IS_NOWHERE
+#define CONFIG_ENV_SIZE               SZ_128K
+
+#ifndef CONFIG_ENV_IS_NOWHERE
+/* Environment in MMC */
+# if defined(CONFIG_ENV_IS_IN_MMC)
+  #define CONFIG_ENV_OFFSET           (8 * SZ_64K)
+/* Environment in NAND */
+# elif defined(CONFIG_ENV_IS_IN_NAND)
+#  define CONFIG_ENV_OFFSET           0x1000000
+#  define CONFIG_ENV_SECT_SIZE        0x200000
+# endif
+#endif
 
 /* USB Configs */
 /* USB */
