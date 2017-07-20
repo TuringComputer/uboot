@@ -91,7 +91,7 @@ static iomux_v3_cfg_t const nand_pads[] = {
 };
 #endif
 
-#define USDHC1_CD_GPIO          IMX_GPIO_NR(3, 4)
+#define USDHC1_CD_GPIO          IMX_GPIO_NR(1, 9)
 #define USB_HUB_RSTn            IMX_GPIO_NR(1, 11)
 #define USB_OTG_PWR_EN          IMX_GPIO_NR(4, 26)
 
@@ -180,8 +180,7 @@ static struct fsl_esdhc_cfg usdhc_cfg[1] = {
 
 int board_mmc_getcd(struct mmc *mmc)
 {
-	//return !gpio_get_value(USDHC1_CD_GPIO);
-    return 1;
+	return !gpio_get_value(USDHC1_CD_GPIO);
 }
 
 int board_mmc_init(bd_t *bis)
