@@ -260,13 +260,13 @@ int board_late_init(void)
 
     if (is_cpu_type(MXC_CPU_MX6UL))
     {
-        setenv("board_rev", "MX6UL");
+        setenv("board_rev", "IMX6G");
         setenv("fdtfile", "imx6ul-turing-eval.dtb");
         setenv("fdtnand", "dtb-ul-0");
     }
     else
     {
-        setenv("board_rev", "MX6ULL");
+        setenv("board_rev", "IMX6Y");
         setenv("fdtfile", "imx6ull-turing-eval.dtb");
         setenv("fdtnand", "dtb-ull-0");
     }
