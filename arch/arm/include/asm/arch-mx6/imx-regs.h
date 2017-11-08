@@ -363,8 +363,10 @@
 #if !(defined(__KERNEL_STRICT_NAMES) || defined(__ASSEMBLY__))
 #include <asm/types.h>
 
+// Turing Computer:
+// Adding i.MX6ULL to QDOG3 macro
 /* only for i.MX6SX/UL */
-#define WDOG3_BASE_ADDR ((is_mx6ul() ?	\
+#define WDOG3_BASE_ADDR (((is_mx6ul() || is_mx6ull()) ?	\
 			 MX6UL_WDOG3_BASE_ADDR :  MX6SX_WDOG3_BASE_ADDR))
 #define LCDIF1_BASE_ADDR ((is_cpu_type(MXC_CPU_MX6SLL)) ?	\
 			  MX6SLL_LCDIF_BASE_ADDR :		\
