@@ -87,7 +87,7 @@
     "mmcroot=" MMCROOT1 " rootwait rw\0"                                                                            \
     "nandroot=ubi0 rootfstype=ubifs rootwait rw\0"                                                                  \
     "mmcautodetect=yes\0"                                                                                           \
-    "mmcargs=setenv bootargs console=${console},${baudrate} no_console_suspend soc=$board_rev ${mtdparts} "         \
+    "mmcargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} soc=$board_rev ${mtdparts} "         \
         "root=${mmcroot}\0"                                                                                         \
     "loadbootscript=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0"                                      \
     "bootscript=echo Running bootscript from mmc ...; source\0"                                                     \
@@ -108,7 +108,7 @@
         "else "                                                                                                     \
             "bootz; "                                                                                               \
         "fi;\0"                                                                                                     \
-    "netargs=setenv bootargs console=${console},${baudrate} no_console_suspend soc=$board_rev ${mtdparts} "         \
+    "netargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} soc=$board_rev ${mtdparts} "         \
         "root=/dev/nfs ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp\0"                                             \
     "netboot=echo Booting from net...; "                                                                            \
         "usb start;"                                                                                                \
@@ -132,7 +132,7 @@
         "else "                                                                                                     \
             "bootz; "                                                                                               \
         "fi;\0"                                                                                                     \
-    "nandargs=setenv bootargs console=${console},${baudrate} no_console_suspend soc=$board_rev ${mtdparts} "        \
+    "nandargs=setenv bootargs console=${console},${baudrate} no_console_suspend ${bootargs_mem} soc=$board_rev ${mtdparts} "        \
         "ubi.mtd=8,8192 root=${nandroot}\0"                                                                         \
     "nandboot=echo Booting from nand...; "                                                                          \
         "run nandargs; "                                                                                            \

@@ -271,6 +271,8 @@ int board_late_init(void)
         setenv("fdtnand", "dtb-ull-0");
     }
 
+    setenv("bootargs_mem", "cma=128M");
+
 	return 0;
 }
 
