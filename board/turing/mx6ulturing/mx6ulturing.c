@@ -28,9 +28,9 @@ DECLARE_GLOBAL_DATA_PTR;
 	PAD_CTL_PUS_100K_UP | PAD_CTL_SPEED_MED |		                        \
 	PAD_CTL_DSE_48ohm   | PAD_CTL_SRE_FAST  | PAD_CTL_HYS)
 
-#define USDHC_PAD_CTRL (PAD_CTL_PKE | PAD_CTL_PUE |		                    \
-	PAD_CTL_PUS_22K_UP  | PAD_CTL_SPEED_LOW |		                        \
-	PAD_CTL_DSE_48ohm   | PAD_CTL_SRE_FAST  | PAD_CTL_HYS)
+#define USDHC_PAD_CTRL (PAD_CTL_PUS_47K_UP |                        \
+                        PAD_CTL_SPEED_LOW  | PAD_CTL_DSE_80ohm |    \
+                        PAD_CTL_SRE_FAST   | PAD_CTL_HYS)
 
 #define GPMI_PAD_CTRL0 (PAD_CTL_PKE | PAD_CTL_PUE | PAD_CTL_PUS_100K_UP)
 #define GPMI_PAD_CTRL1 (PAD_CTL_DSE_40ohm | PAD_CTL_SPEED_MED | PAD_CTL_SRE_FAST)
@@ -94,6 +94,8 @@ static iomux_v3_cfg_t const nand_pads[] = {
 #define USDHC1_CD_GPIO          IMX_GPIO_NR(1, 9)
 #define USB_HUB_RSTn            IMX_GPIO_NR(1, 11)
 #define USB_OTG_PWR_EN          IMX_GPIO_NR(4, 26)
+#define WIFI_RSTn               IMX_GPIO_NR(1, 31)
+#define WIFI_EN                 IMX_GPIO_NR(1, 27)
 
 static void setup_uart(void)
 {
@@ -271,7 +273,14 @@ int board_late_init(void)
         setenv("fdtnand", "dtb-ull-0");
     }
 
-    setenv("bootargs_mem", "cma=128M");
+    setenv("bootargs_mem", "cma=256M");
+
+    // Restart Wifi module
+    gpio_direction_output(WIFI_RSTn, 0);
+    gpio_direction_output(WIFI_EN, 0);
+    mdelay(100);
+    gpio_direction_output(WIFI_RSTn, 1);
+    gpio_direction_output(WIFI_EN, 1);
 
 	return 0;
 }

@@ -62,6 +62,8 @@ DECLARE_GLOBAL_DATA_PTR;
 #define DISP0_PWR_EN			IMX_GPIO_NR(1, 22)
 #define USB_HUB_RSTn			IMX_GPIO_NR(3, 20)
 #define USB_OTG_PWR_EN			IMX_GPIO_NR(3, 22)
+#define WIFI_RSTn               IMX_GPIO_NR(1, 31)
+#define WIFI_EN                 IMX_GPIO_NR(1, 27)
 
 int dram_init(void)
 {
@@ -548,6 +550,13 @@ int board_late_init(void)
 	    printf("Wrong SOC family!\n");
 	    return -1;
 	}
+
+	// Restart Wifi module
+    gpio_direction_output(WIFI_RSTn, 0);
+    gpio_direction_output(WIFI_EN, 0);
+    mdelay(100);
+    gpio_direction_output(WIFI_RSTn, 1);
+    gpio_direction_output(WIFI_EN, 1);
 
 	return 0;
 }
