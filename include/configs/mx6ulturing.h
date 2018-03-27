@@ -49,7 +49,7 @@
 # define CONFIG_MTD_PARTITIONS
 # define MTDIDS_DEFAULT                 "nand0=gpmi-nand"
 # define MTDPARTS_DEFAULT               "mtdparts=gpmi-nand:14m(spl),2m(uboot)," \
-                                        "2m(env),8m(kernel)," \
+                                        "2m(env),16m(kernel)," \
                                         "2m(dtb-ul-0),2m(dtb-ull-0)," \
                                         "2m(dtb-ul-1),2m(dtb-ull-1)," \
                                         "-(rootfs)"
