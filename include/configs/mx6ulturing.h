@@ -136,7 +136,7 @@
         "ubi.mtd=8,8192 root=${nandroot}\0"                                                                         \
     "nandboot=echo Booting from nand...; "                                                                          \
         "run nandargs; "                                                                                            \
-        "nand read ${loadaddr} kernel 0x800000; "                                                                   \
+        "nand read ${loadaddr} kernel 0xA00000; "                                                                   \
         "nand read ${fdt_addr} ${fdtnand} 0x100000; "                                                               \
         "bootz ${loadaddr} - ${fdt_addr}\0"                                                                         \
 
